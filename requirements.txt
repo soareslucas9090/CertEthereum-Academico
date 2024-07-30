@@ -5,7 +5,7 @@ attrs==23.2.0
 bitarray==2.9.2
 certifi==2024.7.4
 charset-normalizer==3.3.2
-ckzg==1.0.2
+ckzg==1.0.
 cytoolz==0.12.3
 Django==5.0.7
 django-cors-headers==4.4.0
