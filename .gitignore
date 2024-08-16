@@ -96,12 +96,8 @@ celerybeat-schedule.*
 *.sage.py 
 
 # Environments 
-cortexVenv/
-.venv
-.env
 venv
 /venv
-.env 
 .venv 
 env/ 
 venv/ 
