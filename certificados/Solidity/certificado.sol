@@ -14,9 +14,10 @@ contract CertificateRegistry {
         string hashCertificado;
     }
 
-    mapping(string => Cert[]) private certificados;
+    mapping(string => Cert[]) private certificados; 
+    mapping(string => Cert) private certificadosPorHash;
 
-   function emitirCertificado(
+    function emitirCertificado(
         string memory _cpf,
         string memory _nomeDoEstudante,
         string memory _nomeDaInstituicao,
@@ -39,13 +40,22 @@ contract CertificateRegistry {
             _hashCertificado
         );
         certificados[_cpf].push(novoCertificado);
+        certificadosPorHash[_hashCertificado] = novoCertificado;
     }
 
-    function buscarCertificados(string memory _cpf)
+    function buscarCertificadosPorCPF(string memory _cpf)
         public
         view
         returns (Cert[] memory)
     {
         return certificados[_cpf];
+    }
+
+    function buscarCertificadoPorHash(string memory _hashCertificado)
+        public
+        view
+        returns (Cert memory)
+    {
+        return certificadosPorHash[_hashCertificado];
     }
 }

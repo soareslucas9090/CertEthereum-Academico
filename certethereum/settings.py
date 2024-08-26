@@ -14,6 +14,8 @@ import os
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,7 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-*uz98=-4#p&kzhj4j%zpb+8pep)v7@y2z22clgr)i2o=i*$md&"
+SECRET_KEY = os.environ.get("SECRETE_KEY_DJANGO")
+
+# Testa se já há variáveis de ambiente configuradas, se não há, carrega do arquivo local .env
+if not SECRET_KEY:
+    load_dotenv()
+    SECRET_KEY = os.environ.get("SECRETE_KEY_DJANGO")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -120,7 +127,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "pt-br"
 
 TIME_ZONE = "UTC"
 
