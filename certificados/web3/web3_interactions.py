@@ -10,6 +10,17 @@ from web3 import Web3
     op == 2: Busca todos os certificados de um determinado CPF
     op == 3: Busca um certificado de acordo com o hash dele
     
+    O valor de data deve condizer com a função consumida, onde para op == 1
+        data deve ser uma lista com 8 elementos, sendo estes, em ordem:
+        cpf, nome_do_estudante, nome_da_instituicao, curso, descricao_do_curso,
+        escricao_do_certificado, data_de_emissao, carga_horaria
+
+        Para op == 2, data deve ser uma lista de 1 elemento, sendo
+            data[0] == cpf do aluno
+            
+        Para op == 3, data deve ser uma lista de 1 elemento, sendo
+            data[0] == hash do certificado
+    
     Caso op seja qualquer outro valor, é retornado uma exceção
     Caso as variáveis de ambiente não sejam corretamente carregadas é
         retornada uma exceção
