@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 
 from dotenv import load_dotenv
 from web3 import Web3
@@ -26,6 +27,21 @@ from web3 import Web3
         retornada uma exceção
 """
 
+
+def to_dict(certificate):
+    return {
+        "student_name": certificate[0],
+        "cpf": certificate[1],
+        "institution_name": certificate[2],
+        "course": certificate[3],
+        "course_description": certificate[4],
+        "certificate_description": certificate[5],
+        "issue_date": datetime.fromtimestamp(certificate[6]).strftime("%Y-%m-%d"),
+        "course_workload": certificate[7],
+        "hash": certificate[8],
+    }
+
+
 def certs_interactions(op, data):
     load_dotenv()
 
@@ -51,18 +67,17 @@ def certs_interactions(op, data):
 
         if op == 1:
             import hashlib
-            
-            cpf = data[0]
-            nome_do_estudante = data[1]
-            nome_da_instituicao = data[2]
-            curso = data[3]
-            descricao_do_curso = data[4]
-            descricao_do_certificado = data[5]
-            data_de_emissao = data[6]
-            carga_horaria = data[7]
+
+            cpf = data["cpf"]
+            nome_do_estudante = data["student_name"]
+            nome_da_instituicao = data["institution_name"]
+            curso = data["course"]
+            descricao_do_curso = data["course_description"]
+            descricao_do_certificado = data["certificate_description"]
+            data_de_emissao = data["issue_date"]
+            carga_horaria = data["course_workload"]
             hash_certificado = hashlib.sha256(str(data).encode()).hexdigest()
 
-            
             transaction = contract.functions.emitirCertificado(
                 cpf,
                 nome_do_estudante,
@@ -83,24 +98,36 @@ def certs_interactions(op, data):
             # Calculando o gas estimado e adicionando na transação
             estimated_gas = w3.eth.estimate_gas(transaction)
             transaction["gas"] = estimated_gas
-            
-            signed_txn = w3.eth.account.sign_transaction(transaction, private_key=private_key)
+
+            signed_txn = w3.eth.account.sign_transaction(
+                transaction, private_key=private_key
+            )
             tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
-            
+
             tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
-            return (f"Transação bem-sucedida com hash: {tx_receipt["transactionHash"].hex()}")
+            return tx_receipt["transactionHash"].hex()
 
         elif op == 2:
-            cpf = data[0]
+            cpf = data["search_cpf"]
             certificates = contract.functions.buscarCertificadosPorCPF(cpf).call()
+            if certificates:
+                result = []
 
-            return certificates
-        
+                for cert in certificates:
+                    result.append(to_dict(cert))
+
+                return result
+
+            return "Sem Resultados"
+
         elif op == 3:
-            hash_cert = data[0]
+            hash_cert = data["search_hash"]
             cert = contract.functions.buscarCertificadoPorHash(hash_cert).call()
-            
-            return cert
+
+            if cert[0] != "":
+                return to_dict(cert)
+
+            return "Sem Resultados"
 
         else:
             raise
