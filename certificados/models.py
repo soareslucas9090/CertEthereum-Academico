@@ -76,8 +76,3 @@ class Users(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = "User"
         verbose_name_plural = "Users"
-
-    def save(self, *args, **kwargs):
-        self.name = self.name.lower()
-
-        super().save(*args, **kwargs)

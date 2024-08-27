@@ -1,17 +1,23 @@
 from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
-from .views import *
+from .views.api_views import *
+from .views.front_views import *
 
 certificados_router = SimpleRouter()
 certificados_router.register("users", UsersViewSet)
 
 urlpatterns = [
-    path("", include(certificados_router.urls)),
+    ####### API #######
+    path("api/v1/", include(certificados_router.urls)),
     path(
-        "issue/certificates",
+        "api/v1/issue/certificates/",
         IssueCertificateViewSet.as_view(),
         name="issue_certificates",
     ),
-    path("search", SearchCertificateViewSet.as_view(), name="search_certificates"),
+    path(
+        "api/v1/search/", SearchCertificateViewSet.as_view(), name="search_certificates"
+    ),
+    ####### Front #######
+    path("search/cpf/", SearchByCPFView.as_view(), name="search-cpf"),
 ]

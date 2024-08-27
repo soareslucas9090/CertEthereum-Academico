@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <div class="container mt-4">
+    <h1>Pesquisa por CPF</h1>
+
+    {% if form.errors %}
+      <div class="alert alert-danger">
+        {% for field in form %}
+          {% for error in field.errors %}
+            <div>{{ error }}</div>
+          {% endfor %}
+        {% endfor %}
+        {% if form.non_field_errors %}
+          {% for error in form.non_field_errors %}
+            <div>{{ error }}</div>
+          {% endfor %}
+        {% endif %}
+      </div>
+    {% endif %}
+    <div class="d-flex justify-content-between mb-3">
+      <form id="searchForm" method="POST" class="form-control size-form-control">
+        <div class="row g-3 align-items-center">
+          {% csrf_token %}
+          <div class="col-auto">
+            {% load custom_tags %}
+            {{ form.cpf|add_class:'form-control' }}
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Pesquisar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    {% if no_result %}
+      <div class="alert alert-danger">
+        <ul class="errorlist">
+          <li>Não há registros para o CPF fornecido</li>
+        </ul>
+      </div>
+    {% endif %}
+
+    {% if results %}
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Estudante</th>
+            <th>Instituição</th>
+            <th>Curso</th>
+            <th>Descrição do curso</th>
+            <th>Descrição do certificado</th>
+            <th>Data de Emissão</th>
+            <th>Carga Horária</th>
+            <th>Hash</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for result in results %}
+            <tr>
+              <td>
+                <p>{{ result.student_name }}</p>
+              </td>
+              <td>
+                <p>{{ result.institution_name }}</p>
+              </td>
+              <td>
+                <p>{{ result.course }}</p>
+              </td>
+              <td>
+                <p>{{ result.course_description }}</p>
+              </td>
+              <td>
+                <p>{{ result.certificate_description }}</p>
+              </td>
+              <td>
+                <p>{{ result.issue_date }}</p>
+              </td>
+              <td>
+                <p>{{ result.course_workload }}</p>
+              </td>
+              <td>
+                <p>{{ result.hash }}</p>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
+{% endblock %}

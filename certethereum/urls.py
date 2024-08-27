@@ -17,7 +17,7 @@ urlpatterns = [
     path("api/token/", TokenObtainPairViewDOC.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshViewDOC.as_view(), name="token_refresh"),
     path("api/token/verify/", TokenVerifyViewDOC.as_view(), name="token_verify"),
-    path("api/certificados/v1/", include("certificados.urls")),
+    path("certificates/", include("certificados.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "api/schema/swagger/",

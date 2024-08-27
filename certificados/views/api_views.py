@@ -10,10 +10,10 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from .models import Users
-from .permissions import IsAdminOrOwnerID
-from .serializers import IssueCertificateSerializer, UsersSerializer
-from .web3 import web3_interactions
+from ..models import Users
+from ..permissions import IsAdminOrOwnerID
+from ..serializers import IssueCertificateSerializer, UsersSerializer
+from ..web3 import web3_interactions
 
 
 class DefaultNumberPagination(PageNumberPagination):
