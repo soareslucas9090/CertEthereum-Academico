@@ -35,7 +35,7 @@ class SearchByCPFView(View):
             searchView = SearchCertificateViewSet.as_view()
             response = searchView(get_request)
 
-            if response.data["status"] == "error":
+            if response.data["status"] == "error":  # type: ignore
                 return render(
                     request=request,
                     template_name="search/search_cpf.html",
@@ -45,7 +45,7 @@ class SearchByCPFView(View):
             return render(
                 request=request,
                 template_name="search/search_cpf.html",
-                context={"form": form, "results": response.data["certificates"]},
+                context={"form": form, "results": response.data["certificates"]},  # type: ignore
             )
 
         else:
