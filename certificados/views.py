@@ -2,7 +2,7 @@ from datetime import datetime
 
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (OpenApiExample, OpenApiParameter,
-                                   extend_schema)
+                                   OpenApiResponse, extend_schema)
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.pagination import PageNumberPagination
@@ -92,18 +92,24 @@ class SearchCertificateViewSet(GenericAPIView):
     permission_classes = [AllowAny]
 
     @extend_schema(
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(description='Success'),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(description='Bad Request'),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(description='Not Found'),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(description='Internal Error'),
+        },
         parameters=[
             OpenApiParameter(
                 name="cpf",
                 type=OpenApiTypes.STR,
-                description="Busca todos os certificados emitidos contendo um determinado CPF",
+                description="(Apenas números) Busca todos os certificados emitidos contendo um determinado CPF",
                 required=False,
                 location=OpenApiParameter.QUERY,
             ),
             OpenApiParameter(
                 name="hash",
                 type=OpenApiTypes.STR,
-                description="Busca o certificado com um determinado hash",
+                description="(Há prioridade pelo hash do que pelo CPF) Busca o certificado com um determinado hash",
                 required=False,
                 location=OpenApiParameter.QUERY,
             ),
@@ -116,7 +122,16 @@ class SearchCertificateViewSet(GenericAPIView):
         data["search_cpf"] = request.GET.get("cpf", None)
 
         if data["search_cpf"]:
-            op = 2
+            if len(data["search_cpf"]) == 11:
+                op = 2
+            else:
+                return Response(
+                        {
+                            "status": "error",
+                            "detail": "CPF must have 11 numerics digits"
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
 
         data["search_hash"] = request.GET.get("hash", None)
 
@@ -125,6 +140,16 @@ class SearchCertificateViewSet(GenericAPIView):
 
         try:
             certificates = web3_interactions.certs_interactions(op, data)
+            
+            if certificates == []:
+                return Response(
+                        {
+                            "status": "error",
+                            "detail": "Not results found for search."
+                        },
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
+                
             return Response(
                 {"status": "success", "certificates": certificates},
                 status=status.HTTP_200_OK,
@@ -134,5 +159,5 @@ class SearchCertificateViewSet(GenericAPIView):
                 {
                     "status": "error",
                 },
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

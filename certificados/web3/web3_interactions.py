@@ -118,7 +118,7 @@ def certs_interactions(op, data):
 
                 return result
 
-            return "Sem Resultados"
+            return []
 
         elif op == 3:
             hash_cert = data["search_hash"]
@@ -127,7 +127,7 @@ def certs_interactions(op, data):
             if cert[0] != "":
                 return to_dict(cert)
 
-            return "Sem Resultados"
+            return []
 
         else:
             raise
