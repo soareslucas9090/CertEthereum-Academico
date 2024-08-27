@@ -58,9 +58,9 @@ class IssueCertificateViewSet(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer = serializer.validated_data
-
+        
         data = {}
-
+        
         data["cpf"] = serializer["cpf"]
         data["student_name"] = serializer["student_name"]
         data["course"] = serializer["course"]
