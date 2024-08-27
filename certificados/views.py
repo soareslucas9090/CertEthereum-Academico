@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from .models import Users
-from .permissions import IsAdmin
+from .permissions import IsAdminOrOwnerID
 from .serializers import IssueCertificateSerializer, UsersSerializer
 from .web3 import web3_interactions
 
@@ -85,7 +85,7 @@ class UsersViewSet(ModelViewSet):
        
     def get_permissions(self):
         if self.request.method in ["PATCH", "DELETE", "POST", "GET"]:
-            return [IsAdmin()]
+            return [IsAdminOrOwnerID()]
         return super().get_permissions()
 
 @extend_schema(tags=["Issue Certificate"])
