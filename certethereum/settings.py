@@ -134,6 +134,21 @@ SPECTACULAR_SETTINGS = {
     "SWAGGER_UI_DIST": "SIDECAR",  # shorthand to use the sidecar instead
     "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
     "REDOC_DIST": "SIDECAR",
+    "TAGS": [
+        {"name": "Auth", "description": "Authentication related endpoints."},
+        {
+            "name": "Issue Certificate",
+            "description": "The POST endpoint to issue certificates.",
+        },
+        {
+            "name": "Search",
+            "description": "The GET endpoint to search certificates by hash or CPF.",
+        },
+        {
+            "name": "Users",
+            "description": "Users related endpoints.",
+        },
+    ],
 }
 
 REST_FRAMEWORK = {

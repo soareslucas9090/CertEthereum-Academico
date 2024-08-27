@@ -19,7 +19,7 @@ from .web3 import web3_interactions
 class DefaultNumberPagination(PageNumberPagination):
     page_size = 20
 
-
+@extend_schema(tags=["Users"])
 class UsersViewSet(ModelViewSet):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
@@ -43,12 +43,52 @@ class UsersViewSet(ModelViewSet):
 
         return queryset
 
+    @extend_schema(
+        description="Just Admin can access.",
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+    
+    @extend_schema(
+        description="Just Admin can access.",
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+    
+    @extend_schema(
+        description="Just Admin can access.",
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    @extend_schema(
+        description="Just Admin can access.",
+        parameters=[
+            OpenApiParameter(
+                name="name",
+                type=OpenApiTypes.STR,
+                description="Search users by institution name.",
+                required=False,
+                location=OpenApiParameter.QUERY,
+            ),
+            OpenApiParameter(
+                name="cnpj",
+                type=OpenApiTypes.STR,
+                description="Search users by institution CNPJ.",
+                required=False,
+                location=OpenApiParameter.QUERY,
+            ),
+        ],
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+       
     def get_permissions(self):
         if self.request.method in ["PATCH", "DELETE", "POST", "GET"]:
             return [IsAdmin()]
         return super().get_permissions()
 
-
+@extend_schema(tags=["Issue Certificate"])
 class IssueCertificateViewSet(GenericAPIView):
     serializer_class = IssueCertificateSerializer
     http_method_names = ["post"]
@@ -86,7 +126,7 @@ class IssueCertificateViewSet(GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-
+@extend_schema(tags=["Search"])
 class SearchCertificateViewSet(GenericAPIView):
     http_method_names = ["get"]
     permission_classes = [AllowAny]
@@ -102,14 +142,14 @@ class SearchCertificateViewSet(GenericAPIView):
             OpenApiParameter(
                 name="cpf",
                 type=OpenApiTypes.STR,
-                description="(Apenas números) Busca todos os certificados emitidos contendo um determinado CPF",
+                description="(Numbers only) Searches for all issued certificates containing a specific CPF",
                 required=False,
                 location=OpenApiParameter.QUERY,
             ),
             OpenApiParameter(
                 name="hash",
                 type=OpenApiTypes.STR,
-                description="(Há prioridade pelo hash do que pelo CPF) Busca o certificado com um determinado hash",
+                description="(There is priority for hash rather than CPF) Search for the certificate with a given hash",
                 required=False,
                 location=OpenApiParameter.QUERY,
             ),
