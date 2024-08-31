@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Callable
 
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.test import RequestFactory
 from django.utils.decorators import method_decorator
@@ -18,7 +18,7 @@ def requestFactory(
     method: str,
     url: str,
     view: Callable[..., HttpResponse],
-    body: dict[str, str] | None = None,
+    body: dict[str, str | None] | None = None,
 ):
     factory = RequestFactory()
     request = getattr(factory, method)
@@ -35,23 +35,22 @@ access_token = ""
 refresh_token = ""
 
 
-def getTokens() -> dict[str, str]:
+def getTokens(request: HttpRequest) -> dict[str, str | None]:
+    access_token = request.COOKIES.get("access_token")
+    refresh_token = request.COOKIES.get("refresh_token")
     return {"access": access_token, "refresh": refresh_token}
 
 
-def setTokens(
-    access: str,
-    refresh: str,
-):
-    global access_token, refresh_token
-    access_token = access
-    refresh_token = refresh
+def setTokens(response: HttpResponse, access: str, refresh: str) -> HttpResponse:
+    response.set_cookie("access_token", access, httponly=True)
+    response.set_cookie("refresh_token", refresh, httponly=True)
+    return response
 
 
 def verifyToken(token: str) -> bool:
     data = {"access": token}
     response = requestFactory(
-        "post", "api/token/verify/", views_jwt.TokenVerifyViewDOC.as_view(), data
+        "post", "api/token/verify/", views_jwt.TokenVerifyViewDOC.as_view(), data  # type: ignore
     )
 
     if response.data.get("detail", None):  # type: ignore
@@ -60,18 +59,18 @@ def verifyToken(token: str) -> bool:
     return True
 
 
-def refreshToken() -> str:
-    data = {"refresh": getTokens()["refresh"]}
+def refreshToken(request: HttpRequest, response_redirect: HttpResponse) -> HttpResponse:
+    tokens = getTokens(request)
+
+    data = {"refresh": tokens["refresh"]}
     response = requestFactory(
         "post", "api/token/refresh/", views_jwt.TokenRefreshViewDOC.as_view(), data
     )
 
     if response.data.get("detail", None):  # type: ignore
-        return ""
+        return setTokens(response_redirect, "", "")
 
-    global access_token
-    access_token = response.data["access"]  # type: ignore
-    return response.data["access"]  # type: ignore
+    return setTokens(response_redirect, response.data.get("access"), tokens["refresh"])  # type: ignore
 
 
 @method_decorator(csrf_protect, name="dispatch")
@@ -164,9 +163,11 @@ class LoginView(View):
                 )
 
             else:
-                setTokens(response.data.get("access"), response.data.get("refresh"))  # type: ignore
+                response_redirect = redirect("menu")
 
-                return redirect("menu")
+                response_redirect = setTokens(response_redirect, response.data.get("access"), response.data.get("refresh"))  # type: ignore
+
+                return response_redirect
 
         else:
             return render(
@@ -179,9 +180,9 @@ class LoginView(View):
 @method_decorator(csrf_protect, name="dispatch")
 class MenuView(View):
     def get(self, request):
-        token = getTokens()
+        token = getTokens(request)
 
-        if token["access"] != "":
+        if token["access"] and token["access"] != True:
             isAuthenticated = True
         else:
             isAuthenticated = False
@@ -191,3 +192,13 @@ class MenuView(View):
             template_name="menu/menu_base.html",
             context={"isAuthenticated": isAuthenticated},
         )
+
+
+@method_decorator(csrf_protect, name="dispatch")
+class LogoutView(View):
+    def get(self, request):
+        response = redirect("menu")
+
+        response = setTokens(response, "", "")
+
+        return response

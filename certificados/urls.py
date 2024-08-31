@@ -22,4 +22,5 @@ urlpatterns = [
     path("search/", SearchView.as_view(), name="search"),
     path("login/", LoginView.as_view(), name="login"),
     path("menu/", MenuView.as_view(), name="menu"),
+    path("menu/logout/", LogoutView.as_view(), name="logout"),
 ]
