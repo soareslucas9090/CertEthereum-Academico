@@ -78,34 +78,43 @@ def certs_interactions(op, data):
             carga_horaria = data["course_workload"]
             hash_certificado = hashlib.sha256(str(data).encode()).hexdigest()
 
-            transaction = contract.functions.emitirCertificado(
-                cpf,
-                nome_do_estudante,
-                nome_da_instituicao,
-                curso,
-                descricao_do_curso,
-                descricao_do_certificado,
-                data_de_emissao,
-                carga_horaria,
-                hash_certificado,
-            ).build_transaction(
-                {
-                    "from": account_address,
-                    "nonce": w3.eth.get_transaction_count(account_address),
-                    "gasPrice": w3.to_wei("25", "gwei"),
-                }
-            )
-            # Calculando o gas estimado e adicionando na transação
-            estimated_gas = w3.eth.estimate_gas(transaction)
-            transaction["gas"] = estimated_gas
+            duplicated_cert = contract.functions.buscarCertificadoPorHash(
+                hash_certificado
+            ).call()
 
-            signed_txn = w3.eth.account.sign_transaction(
-                transaction, private_key=private_key
-            )
-            tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+            if duplicated_cert[0] == "":
 
-            tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
-            return tx_receipt["transactionHash"].hex()
+                transaction = contract.functions.emitirCertificado(
+                    cpf,
+                    nome_do_estudante,
+                    nome_da_instituicao,
+                    curso,
+                    descricao_do_curso,
+                    descricao_do_certificado,
+                    data_de_emissao,
+                    carga_horaria,
+                    hash_certificado,
+                ).build_transaction(
+                    {
+                        "from": account_address,
+                        "nonce": w3.eth.get_transaction_count(account_address),
+                        "gasPrice": w3.to_wei("25", "gwei"),
+                    }
+                )
+                # Calculando o gas estimado e adicionando na transação
+                estimated_gas = w3.eth.estimate_gas(transaction)
+                transaction["gas"] = estimated_gas
+
+                signed_txn = w3.eth.account.sign_transaction(
+                    transaction, private_key=private_key
+                )
+                tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+
+                tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+                return tx_receipt["transactionHash"].hex()
+
+            else:
+                return ""
 
         elif op == 2:
             cpf = data["search_cpf"]

@@ -229,7 +229,14 @@ class IssueCertificateView(View):
                 "post", url, IssueCertificateViewSet.as_view(), data, header
             )
 
-            if response.status_code != 201: 
+            if response.status_code != 201:
+                
+                if response.status_code == 400:
+                    form.add_error(
+                        None,
+                        "Este certificado já existe.",
+                    )
+                    
                 return render(
                     request=request,
                     template_name="menu/certificates/issue.html",

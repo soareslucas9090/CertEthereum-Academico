@@ -121,6 +121,12 @@ class IssueCertificateViewSet(GenericAPIView):
 
         try:
             transaction_hash = web3_interactions.certs_interactions(1, data)
+            if transaction_hash == "":
+                return Response(
+                    {
+                        "status": "error", "detail": "Duplicate Certificate"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             return Response(
                 {"status": "success", "transaction_hash": transaction_hash},
                 status=status.HTTP_201_CREATED,
@@ -130,7 +136,7 @@ class IssueCertificateViewSet(GenericAPIView):
                 {
                     "status": "error",
                 },
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 @extend_schema(tags=["Search"])
