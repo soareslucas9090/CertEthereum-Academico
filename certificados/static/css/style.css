@@ -10,3 +10,8 @@
     max-width: 400px; /* Aumenta o tamanho máximo do card */
     width: 100%;
   }
+
+.search-box {
+    width: 30%;
+    min-width: 10rem
+}

@@ -3,88 +3,85 @@
 
 {% block content %}
   <div class="container-fluid mt-4">
-    <h1>Pesquisa de Certificados</h1>
+    <header>
+      <h1>Pesquisa de Certificados</h1>
+    </header>
 
     {% if form.errors %}
-      <div class="alert alert-danger">
+      <div class="alert alert-danger" role="alert">
         {% for field in form %}
           {% for error in field.errors %}
-            <div>{{ error }}</div>
+            <p>{{ error }}</p>
           {% endfor %}
         {% endfor %}
         {% if form.non_field_errors %}
           {% for error in form.non_field_errors %}
-            <div>{{ error }}</div>
+            <p>{{ error }}</p>
           {% endfor %}
         {% endif %}
       </div>
     {% endif %}
-    <div class="d-flex justify-content-between mb-3">
+
+    <section>
       <form id="searchForm" method="POST" class="form-control size-form-control">
         <div class="row g-3 align-items-center">
           {% load custom_tags %}
           {% csrf_token %}
-          <div class="col-auto">{{ form.search_type }}</div>
-          <div class="col-auto">{{ form.value|add_class:'form-control' }}</div>
+          <div class="col-auto">
+            <label for="search_type">Tipo de Pesquisa</label>
+            {{ form.search_type }}
+          </div>
+          <div class="col-auto search-box">
+            <label for="value">Valor</label>
+            {{ form.value|add_class:'form-control' }}
+          </div>
           <div class="col-auto">
             <button type="submit" class="btn btn-primary">Pesquisar</button>
           </div>
         </div>
       </form>
-    </div>
+    </section>
+
     {% if no_result %}
-      <div class="alert alert-danger">
-        <ul class="errorlist">
-          <li>Não há registros para o {{ no_result }} fornecido</li>
-        </ul>
-      </div>
+      <section>
+        <div class="alert alert-danger" role="alert">
+          <p>Não há registros para o {{ no_result }} fornecido</p>
+        </div>
+      </section>
     {% endif %}
 
     {% if results %}
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>Estudante</th>
-            <th>Instituição</th>
-            <th>Curso</th>
-            <th>Descrição do curso</th>
-            <th>Descrição do certificado</th>
-            <th>Data de Emissão</th>
-            <th>Carga Horária</th>
-            <th>Hash</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for result in results %}
+      <section>
+        <table class="table table-bordered">
+          <caption>Resultados da pesquisa de certificados</caption>
+          <thead>
             <tr>
-              <td>
-                <p>{{ result.student_name }}</p>
-              </td>
-              <td>
-                <p>{{ result.institution_name }}</p>
-              </td>
-              <td>
-                <p>{{ result.course }}</p>
-              </td>
-              <td>
-                <p>{{ result.course_description }}</p>
-              </td>
-              <td>
-                <p>{{ result.certificate_description }}</p>
-              </td>
-              <td>
-                <p>{{ result.issue_date }}</p>
-              </td>
-              <td>
-                <p>{{ result.course_workload }}</p>
-              </td>
-              <td>
-                <p>{{ result.hash }}</p>
-              </td>
+              <th scope="col">Estudante</th>
+              <th scope="col">Instituição</th>
+              <th scope="col">Curso</th>
+              <th scope="col">Descrição do curso</th>
+              <th scope="col">Descrição do certificado</th>
+              <th scope="col">Data de Emissão</th>
+              <th scope="col">Carga Horária</th>
+              <th scope="col">Hash</th>
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for result in results %}
+              <tr>
+                <td>{{ result.student_name }}</td>
+                <td>{{ result.institution_name }}</td>
+                <td>{{ result.course }}</td>
+                <td>{{ result.course_description }}</td>
+                <td>{{ result.certificate_description }}</td>
+                <td>{{ result.issue_date }}</td>
+                <td>{{ result.course_workload }}</td>
+                <td>{{ result.hash }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
     {% endif %}
   </div>
 {% endblock %}
