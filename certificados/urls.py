@@ -19,5 +19,7 @@ urlpatterns = [
         "api/v1/search/", SearchCertificateViewSet.as_view(), name="search_certificates"
     ),
     ####### Front #######
-    path("search/cpf/", SearchByCPFView.as_view(), name="search-cpf"),
+    path("search/", SearchByCPFView.as_view(), name="search"),
+    ####### Front #######
+    path("login/", LoginView.as_view(), name="login"),
 ]

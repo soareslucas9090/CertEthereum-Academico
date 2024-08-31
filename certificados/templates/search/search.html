@@ -2,8 +2,8 @@
 {% load static %}
 
 {% block content %}
-  <div class="container mt-4">
-    <h1>Pesquisa por CPF</h1>
+  <div class="container-fluid mt-4">
+    <h1>Pesquisa de Certificados</h1>
 
     {% if form.errors %}
       <div class="alert alert-danger">
@@ -22,11 +22,10 @@
     <div class="d-flex justify-content-between mb-3">
       <form id="searchForm" method="POST" class="form-control size-form-control">
         <div class="row g-3 align-items-center">
+          {% load custom_tags %}
           {% csrf_token %}
-          <div class="col-auto">
-            {% load custom_tags %}
-            {{ form.cpf|add_class:'form-control' }}
-          </div>
+          <div class="col-auto">{{ form.search_type }}</div>
+          <div class="col-auto">{{ form.value|add_class:'form-control' }}</div>
           <div class="col-auto">
             <button type="submit" class="btn btn-primary">Pesquisar</button>
           </div>
@@ -36,7 +35,7 @@
     {% if no_result %}
       <div class="alert alert-danger">
         <ul class="errorlist">
-          <li>Não há registros para o CPF fornecido</li>
+          <li>Não há registros para o {{ no_result }} fornecido</li>
         </ul>
       </div>
     {% endif %}

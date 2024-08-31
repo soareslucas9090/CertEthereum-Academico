@@ -7,12 +7,19 @@ class LoginForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput())
 
 
-class SearchCPFCertificateForm(forms.Form):
-    cpf = forms.CharField()
+class SearchCertificateForm(forms.Form):
+    SEARCH_CHOICES = [("cpf", "CPF"), ("hash", "Hash")]
 
-    def clean_cpf(self):
-        cpf = str(self.cleaned_data.get("cpf"))
+    search_type = forms.ChoiceField(choices=SEARCH_CHOICES, widget=forms.RadioSelect())
+    value = forms.CharField(required=False)
 
-        if len(cpf) != 11 or not cpf.isdigit():
-            raise ValidationError("O CPF fornecido é inválido.")
-        return cpf
+    def clean_value(self):
+        value = str(self.cleaned_data.get("value"))
+
+        if str(self.cleaned_data.get("search_type")) == "cpf":
+
+            if len(value) != 11 or not value.isdigit():
+                raise ValidationError("O CPF fornecido é inválido.")
+            return value
+
+        return value

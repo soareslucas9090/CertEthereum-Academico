@@ -1,0 +1,12 @@
+.full-height {
+    height: 100vh;
+  }
+  .vertical-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .login-card {
+    max-width: 400px; /* Aumenta o tamanho máximo do card */
+    width: 100%;
+  }
