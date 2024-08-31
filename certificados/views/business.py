@@ -10,7 +10,8 @@ def requestFactory(
     method: str,
     url: str,
     view: Callable[..., HttpResponse],
-    body: dict[str, str | None] | None = None,
+    body: dict[str, str] | None = None,
+    header: dict | None = None,
 ):
     factory = RequestFactory()
     request = getattr(factory, method)
@@ -19,6 +20,10 @@ def requestFactory(
         request = request(url, data=body)
     else:
         request = request(url)
+
+    if header:
+        for key, value in header.items():
+            request.META[f"HTTP_{key.upper()}"] = value
 
     return view(request)
 
@@ -36,12 +41,12 @@ def setTokens(response: HttpResponse, access: str, refresh: str) -> HttpResponse
 
 
 def verifyToken(token: str) -> bool:
-    data = {"access": token}
+    data = {"token": token}
     response = requestFactory(
         "post", "api/token/verify/", views_jwt.TokenVerifyViewDOC.as_view(), data  # type: ignore
     )
 
-    if response.data.get("detail", None):  # type: ignore
+    if response.status_code != 200:
         return False
 
     return True
@@ -50,12 +55,19 @@ def verifyToken(token: str) -> bool:
 def refreshToken(request: HttpRequest, response_redirect: HttpResponse) -> HttpResponse:
     tokens = getTokens(request)
 
-    data = {"refresh": tokens["refresh"]}
+    refresh = tokens["refresh"]
+
+    data = {}
+    if refresh:
+        data = {"refresh": refresh}
+    else:
+        data = {"refresh": "null"}
+
     response = requestFactory(
         "post", "api/token/refresh/", views_jwt.TokenRefreshViewDOC.as_view(), data
     )
 
-    if response.data.get("detail", None):  # type: ignore
+    if response.status_code != 200:
         return setTokens(response_redirect, "", "")
 
     return setTokens(response_redirect, response.data.get("access"), tokens["refresh"])  # type: ignore
@@ -64,7 +76,7 @@ def refreshToken(request: HttpRequest, response_redirect: HttpResponse) -> HttpR
 def isAuthenticated(token: dict[str, str | None]) -> bool:
     isAuthenticated = False
 
-    if token["access"] and token["access"] != True:
+    if token["access"] and token["access"] != "":
         isAuthenticated = True
 
     return isAuthenticated

@@ -94,6 +94,13 @@ class IssueCertificateViewSet(GenericAPIView):
     http_method_names = ["post"]
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        responses={
+            status.HTTP_201_CREATED: OpenApiResponse(description='Created'),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(description='Bad Request'),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(description='Internal Error'),
+        }
+    )
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

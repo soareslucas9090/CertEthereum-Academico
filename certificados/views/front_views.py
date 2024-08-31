@@ -10,16 +10,27 @@ from django.views.decorators.csrf import csrf_protect
 
 from certethereum import views_jwt
 
-from ..forms import LoginForm, SearchCertificateForm
-from .api_views import SearchCertificateViewSet
-from .business import (
-    getTokens,
-    isAuthenticated,
-    refreshToken,
-    requestFactory,
-    setTokens,
-    verifyToken,
-)
+from ..forms import IssueCertificateForm, LoginForm, SearchCertificateForm
+from .api_views import IssueCertificateViewSet, SearchCertificateViewSet
+from .business import (getTokens, isAuthenticated, refreshToken,
+                       requestFactory, setTokens, verifyToken)
+
+
+def protectedEndPoint(
+    request: HttpRequest, url: str, isAuth: bool, token: dict[str, str | None]
+) -> HttpResponse | None:
+    if not isAuth:
+        return redirect("login")
+
+    isValidToken = verifyToken(str(token["access"]))
+    if not isValidToken:
+        response = redirect(url)
+
+        response = refreshToken(request, response)
+
+        return response
+
+    return None
 
 
 @method_decorator(csrf_protect, name="dispatch")
@@ -161,5 +172,82 @@ class SearchView(View):
             return render(
                 request=request,
                 template_name="menu/certificates/search.html",
+                context={"form": form, "isAuthenticated": isAuth},
+            )
+
+
+@method_decorator(csrf_protect, name="dispatch")
+class IssueCertificateView(View):
+    def get(self, request):
+        token = getTokens(request)
+        isAuth = isAuthenticated(token)
+
+        response = protectedEndPoint(request, "issue_certificate", isAuth, token)
+        if response:
+            return response
+
+        form = IssueCertificateForm()
+
+        return render(
+            request=request,
+            template_name="menu/certificates/issue.html",
+            context={
+                "form": form,
+                "isAuthenticated": isAuth
+            },
+        )
+
+    def post(self, request):
+        token = getTokens(request)
+        isAuth = isAuthenticated(token)
+
+        response = protectedEndPoint(request, "issue_certificate", isAuth, token)
+        if response:
+            return response
+
+        form = IssueCertificateForm(request.POST)
+
+        if form.is_valid():
+
+            url = f"/certificates/api/v1/issue/certificates/"
+
+            data = {}
+            data["cpf"] = form.cleaned_data["cpf"]
+            data["student_name"] = form.cleaned_data["student_name"]
+            data["course"] = form.cleaned_data["course"]
+            data["course_description"] = form.cleaned_data["course_description"]
+            data["certificate_description"] = form.cleaned_data[
+                "certificate_description"
+            ]
+            data["issue_date"] = form.cleaned_data["issue_date"]
+            data["course_workload"] = form.cleaned_data["course_workload"]
+
+            header = {}
+            header = {"Authorization": f"Bearer {token["access"]}"}
+
+            response = requestFactory(
+                "post", url, IssueCertificateViewSet.as_view(), data, header
+            )
+
+            if response.status_code != 201: 
+                return render(
+                    request=request,
+                    template_name="menu/certificates/issue.html",
+                    context={
+                        "form": form,
+                        "isAuthenticated": isAuth
+                    },
+                )
+
+            return render(
+                request=request,
+                template_name="menu/certificates/issue.html",
+                context={"form": form, "isAuthenticated": isAuth, "created": True},
+            )
+
+        else:
+            return render(
+                request=request,
+                template_name="menu/certificates/issue.html",
                 context={"form": form, "isAuthenticated": isAuth},
             )

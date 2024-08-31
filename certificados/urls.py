@@ -19,7 +19,8 @@ urlpatterns = [
         "api/v1/search/", SearchCertificateViewSet.as_view(), name="search_certificates"
     ),
     ####### Front #######
-    path("search/", SearchView.as_view(), name="search"),
+    path("menu/search/", SearchView.as_view(), name="search"),
+    path("menu/issue/", IssueCertificateView.as_view(), name="issue_certificate"),
     path("login/", LoginView.as_view(), name="login"),
     path("menu/", MenuView.as_view(), name="menu"),
     path("menu/logout/", LogoutView.as_view(), name="logout"),

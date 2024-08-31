@@ -1,0 +1,62 @@
+{% extends 'menu/menu_base.html' %}
+{% load static %}
+
+{% block menu_content %}
+  <div class="container-fluid mt-4">
+    <header>
+      <h1>Submeter Certificado</h1>
+    </header>
+
+    {% if created %}
+      <div class="alert alert-success">
+        <p>Certificado inserido com sucesso!</p>
+      </div>
+    {% endif %}
+
+    {% if form.errors %}
+      <div class="alert alert-danger">
+        {% for field in form %}
+          {% for error in field.errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
+        {% endfor %}
+        {% if form.non_field_errors %}
+          {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <form method="POST">
+      {% csrf_token %}
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Estudante</th>
+            <th scope="col">CPF</th>
+            <th scope="col">Curso</th>
+            <th scope="col">Descrição do curso</th>
+            <th scope="col">Descrição do certificado</th>
+            <th scope="col">Data de Emissão</th>
+            <th scope="col">Carga Horária</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            {% load custom_tags %}
+            <td>{{ form.student_name|add_class:'form-control' }}</td>
+            <td>{{ form.cpf|add_class:'form-control' }}</td>
+            <td>{{ form.course|add_class:'form-control' }}</td>
+            <td>{{ form.course_description|add_class:'form-control' }}</td>
+            <td>{{ form.certificate_description|add_class:'form-control' }}</td>
+            <td>{{ form.issue_date|add_class:'form-control' }}</td>
+            <td>{{ form.course_workload|add_class:'form-control' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <button type="submit" class="btn btn-primary">Salvar</button>
+      <a href="{% url 'menu' %}" class="btn btn-primary">Voltar</a>
+    </form>
+  </div>
+{% endblock %}
