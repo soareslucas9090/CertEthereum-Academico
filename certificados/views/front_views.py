@@ -23,66 +23,13 @@ from .business import (
 
 
 @method_decorator(csrf_protect, name="dispatch")
-class SearchView(View):
+class LogoutView(View):
     def get(self, request):
-        token = getTokens(request)
-        isAuth = isAuthenticated(token)
+        response = redirect("menu")
 
-        form = SearchCertificateForm()
+        response = setTokens(response, "", "")
 
-        return render(
-            request=request,
-            template_name="menu/search/search.html",
-            context={
-                "form": form,
-                "isAuthenticated": isAuth,
-            },
-        )
-
-    def post(self, request):
-        token = getTokens(request)
-        isAuth = isAuthenticated(token)
-
-        form = SearchCertificateForm(request.POST)
-
-        if form.is_valid():
-            value = form.clean_value()
-            choice = form.cleaned_data["search_type"]
-
-            if choice == "cpf":
-                url = f"/certificates/api/v1/search/?cpf={value}"
-            elif choice == "hash":
-                url = f"/certificates/api/v1/search/?hash={value}"
-
-            response = requestFactory("get", url, SearchCertificateViewSet.as_view())
-
-            if response.data["status"] == "error":  # type: ignore
-                return render(
-                    request=request,
-                    template_name="menu/search/search.html",
-                    context={
-                        "form": form,
-                        "no_result": choice.upper(),
-                        "isAuthenticated": isAuth,
-                    },
-                )
-
-            # Caso o retorno seja somente um resultado, é colocado em uma lista para iteração no HTML
-            if choice == "hash":
-                response.data["certificates"] = [response.data["certificates"]]  # type: ignore
-
-            return render(
-                request=request,
-                template_name="menu/search/search.html",
-                context={"form": form, "results": response.data["certificates"], "isAuthenticated": isAuth},  # type: ignore
-            )
-
-        else:
-            return render(
-                request=request,
-                template_name="menu/search/search.html",
-                context={"form": form, "isAuthenticated": isAuth},
-            )
+        return response
 
 
 @method_decorator(csrf_protect, name="dispatch")
@@ -156,10 +103,63 @@ class MenuView(View):
 
 
 @method_decorator(csrf_protect, name="dispatch")
-class LogoutView(View):
+class SearchView(View):
     def get(self, request):
-        response = redirect("menu")
+        token = getTokens(request)
+        isAuth = isAuthenticated(token)
 
-        response = setTokens(response, "", "")
+        form = SearchCertificateForm()
 
-        return response
+        return render(
+            request=request,
+            template_name="menu/certificates/search.html",
+            context={
+                "form": form,
+                "isAuthenticated": isAuth,
+            },
+        )
+
+    def post(self, request):
+        token = getTokens(request)
+        isAuth = isAuthenticated(token)
+
+        form = SearchCertificateForm(request.POST)
+
+        if form.is_valid():
+            value = form.clean_value()
+            choice = form.cleaned_data["search_type"]
+
+            if choice == "cpf":
+                url = f"/certificates/api/v1/search/?cpf={value}"
+            elif choice == "hash":
+                url = f"/certificates/api/v1/search/?hash={value}"
+
+            response = requestFactory("get", url, SearchCertificateViewSet.as_view())
+
+            if response.data["status"] == "error":  # type: ignore
+                return render(
+                    request=request,
+                    template_name="menu/certificates/search.html",
+                    context={
+                        "form": form,
+                        "no_result": choice.upper(),
+                        "isAuthenticated": isAuth,
+                    },
+                )
+
+            # Caso o retorno seja somente um resultado, é colocado em uma lista para iteração no HTML
+            if choice == "hash":
+                response.data["certificates"] = [response.data["certificates"]]  # type: ignore
+
+            return render(
+                request=request,
+                template_name="menu/certificates/search.html",
+                context={"form": form, "results": response.data["certificates"], "isAuthenticated": isAuth},  # type: ignore
+            )
+
+        else:
+            return render(
+                request=request,
+                template_name="menu/certificates/search.html",
+                context={"form": form, "isAuthenticated": isAuth},
+            )
