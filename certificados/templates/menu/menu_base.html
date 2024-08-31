@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <div class="card-menu w-100">
+    <div class="card-body">
+      <div class="text-center my-3">
+        <img src="{% static 'imgs/logo.png' %}" alt="CertEthereum" class="img-fluid" style="max-width: 130px;" />
+      </div>
+      <nav class="navbar navbar-expand-lg custom-navbar">
+        <div class="container-fluid">
+          <ul class="navbar-nav w-100 justify-content-around">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownCertificados" role="button" data-bs-toggle="dropdown" aria-expanded="false">Certificados</a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownCertificados">
+                <li>
+                  <a class="dropdown-item" href="{% url 'search' %}">Pesquisar Certificados</a>
+                </li>
+                {% if isAuthenticated %}
+                  <li>
+                    <a class="dropdown-item" href="{% url 'search' %}">Inserir Certificado</a>
+                  </li>
+                {% endif %}
+              </ul>
+            </li>
+            {% if not isAuthenticated %}
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownLogin" role="button" data-bs-toggle="dropdown" aria-expanded="false">Login</a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownLogin">
+                  <li>
+                    <a class="dropdown-item" href="{% url 'login' %}">Fazer Login</a>
+                  </li>
+                </ul>
+              </li>
+            {% endif %}
+            {% if isAuthenticated %}
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownLogout" role="button" data-bs-toggle="dropdown" aria-expanded="false">Logout</a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownLogout">
+                  <li>
+                    <a class="dropdown-item" href="{% url 'login' %}">Sair</a>
+                  </li>
+                </ul>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+      </nav>
+
+      {% block menu_content %}
+
+      {% endblock %}
+    </div>
+  </div>
+{% endblock %}

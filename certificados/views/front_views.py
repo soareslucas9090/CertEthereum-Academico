@@ -75,13 +75,13 @@ def refreshToken() -> str:
 
 
 @method_decorator(csrf_protect, name="dispatch")
-class SearchByCPFView(View):
+class SearchView(View):
     def get(self, request):
         form = SearchCertificateForm()
 
         return render(
             request=request,
-            template_name="search/search.html",
+            template_name="menu/search/search.html",
             context={"form": form},
         )
 
@@ -103,7 +103,7 @@ class SearchByCPFView(View):
             if response.data["status"] == "error":  # type: ignore
                 return render(
                     request=request,
-                    template_name="search/search.html",
+                    template_name="menu/search/search.html",
                     context={"form": form, "no_result": choice.upper()},
                 )
 
@@ -113,14 +113,14 @@ class SearchByCPFView(View):
 
             return render(
                 request=request,
-                template_name="search/search.html",
+                template_name="menu/search/search.html",
                 context={"form": form, "results": response.data["certificates"]},  # type: ignore
             )
 
         else:
             return render(
                 request=request,
-                template_name="search/search.html",
+                template_name="menu/search/search.html",
                 context={"form": form},
             )
 
@@ -132,7 +132,7 @@ class LoginView(View):
 
         return render(
             request=request,
-            template_name="registration/login.html",
+            template_name="menu/registration/login.html",
             context={"form": form},
         )
 
@@ -159,22 +159,35 @@ class LoginView(View):
 
                 return render(
                     request=request,
-                    template_name="registration/login.html",
+                    template_name="menu/registration/login.html",
                     context={"form": form},
                 )
 
             else:
                 setTokens(response.data.get("access"), response.data.get("refresh"))  # type: ignore
 
-                return render(
-                    request=request,
-                    template_name="registration/login.html",
-                    context={"form": form},
-                )
+                return redirect("menu")
 
         else:
             return render(
                 request=request,
-                template_name="registration/login.html",
+                template_name="menu/registration/login.html",
                 context={"form": form},
             )
+
+
+@method_decorator(csrf_protect, name="dispatch")
+class MenuView(View):
+    def get(self, request):
+        token = getTokens()
+
+        if token["access"] != "":
+            isAuthenticated = True
+        else:
+            isAuthenticated = False
+
+        return render(
+            request=request,
+            template_name="menu/menu_base.html",
+            context={"isAuthenticated": isAuthenticated},
+        )
