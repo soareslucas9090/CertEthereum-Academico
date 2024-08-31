@@ -31,14 +31,10 @@ def requestFactory(
     return view(request)
 
 
-access_token = ""
-refresh_token = ""
-
-
 def getTokens(request: HttpRequest) -> dict[str, str | None]:
-    access_token = request.COOKIES.get("access_token")
-    refresh_token = request.COOKIES.get("refresh_token")
-    return {"access": access_token, "refresh": refresh_token}
+    access = request.COOKIES.get("access_token")
+    refresh = request.COOKIES.get("refresh_token")
+    return {"access": access, "refresh": refresh}
 
 
 def setTokens(response: HttpResponse, access: str, refresh: str) -> HttpResponse:
@@ -73,18 +69,36 @@ def refreshToken(request: HttpRequest, response_redirect: HttpResponse) -> HttpR
     return setTokens(response_redirect, response.data.get("access"), tokens["refresh"])  # type: ignore
 
 
+def isAuthenticated(token: dict[str, str | None]) -> bool:
+    isAuthenticated = False
+
+    if token["access"] and token["access"] != True:
+        isAuthenticated = True
+
+    return isAuthenticated
+
+
 @method_decorator(csrf_protect, name="dispatch")
 class SearchView(View):
     def get(self, request):
+        token = getTokens(request)
+        isAuth = isAuthenticated(token)
+
         form = SearchCertificateForm()
 
         return render(
             request=request,
             template_name="menu/search/search.html",
-            context={"form": form},
+            context={
+                "form": form,
+                "isAuthenticated": isAuth,
+            },
         )
 
     def post(self, request):
+
+        token = getTokens(request)
+        isAuth = isAuthenticated(token)
 
         form = SearchCertificateForm(request.POST)
 
@@ -103,7 +117,11 @@ class SearchView(View):
                 return render(
                     request=request,
                     template_name="menu/search/search.html",
-                    context={"form": form, "no_result": choice.upper()},
+                    context={
+                        "form": form,
+                        "no_result": choice.upper(),
+                        "isAuthenticated": isAuth,
+                    },
                 )
 
             # Caso o retorno seja somente um resultado, é colocado em uma lista para iteração no HTML
@@ -113,14 +131,14 @@ class SearchView(View):
             return render(
                 request=request,
                 template_name="menu/search/search.html",
-                context={"form": form, "results": response.data["certificates"]},  # type: ignore
+                context={"form": form, "results": response.data["certificates"], "isAuthenticated": isAuth},  # type: ignore
             )
 
         else:
             return render(
                 request=request,
                 template_name="menu/search/search.html",
-                context={"form": form},
+                context={"form": form, "isAuthenticated": isAuth},
             )
 
 
@@ -181,16 +199,12 @@ class LoginView(View):
 class MenuView(View):
     def get(self, request):
         token = getTokens(request)
-
-        if token["access"] and token["access"] != True:
-            isAuthenticated = True
-        else:
-            isAuthenticated = False
+        isAuth = isAuthenticated(token)
 
         return render(
             request=request,
             template_name="menu/menu_base.html",
-            context={"isAuthenticated": isAuthenticated},
+            context={"isAuthenticated": isAuth},
         )
 
 
