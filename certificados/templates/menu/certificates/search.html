@@ -7,6 +7,10 @@
       <h1>Pesquisa de Certificados</h1>
     </header>
 
+    <div id="loading-spinner" class="loading-spinner d-none">
+      <div class="spinner-border text-primary" role="status" aria-label="Carregando"></div>
+    </div>
+
     {% if form.errors %}
       <div class="alert alert-danger" role="alert">
         {% for field in form %}
@@ -23,7 +27,7 @@
     {% endif %}
 
     <section>
-      <form id="searchForm" method="POST" class="form-control size-form-control">
+      <form id="form" method="POST" class="form-control size-form-control">
         <div class="row g-3 align-items-center">
           {% load custom_tags %}
           {% csrf_token %}
@@ -84,4 +88,8 @@
       </section>
     {% endif %}
   </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/spinner.js' %}"></script>
 {% endblock %}

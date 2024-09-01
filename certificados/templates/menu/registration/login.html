@@ -24,7 +24,7 @@
           <div class="alert alert-danger" role="alert">Usuário e/ou senha inválidos. Tente novamente</div>
         {% endif %}
 
-        <form method="post" action="#">
+        <form id="form" method="post" action="#">
           {% csrf_token %}
           {% load custom_tags %}
           <div class="form-group mt-3">
@@ -43,4 +43,8 @@
       </div>
     </div>
   </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/spinner.js' %}"></script>
 {% endblock %}
