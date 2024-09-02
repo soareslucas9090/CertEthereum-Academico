@@ -2,10 +2,6 @@
 {% load static %}
 
 {% block content %}
-  <div id="loading-spinner" class="loading-spinner d-none">
-    <div class="spinner-border text-primary" role="status" aria-label="Carregando"></div>
-  </div>
-
   <div class="col-12 col-md-8 col-lg-4 full-height vertical-center">
     <div class="card shadow-lg login-card">
       <div class="card-body">
@@ -34,8 +30,4 @@
       </div>
     </div>
   </div>
-{% endblock %}
-
-{% block extra_js %}
-  <script src="{% static 'js/spinner.js' %}"></script>
 {% endblock %}

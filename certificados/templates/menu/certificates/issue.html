@@ -7,10 +7,6 @@
       <h1>Submeter Certificado</h1>
     </header>
 
-    <div id="loading-spinner" class="loading-spinner d-none">
-      <div class="spinner-border text-primary" role="status" aria-label="Carregando"></div>
-    </div>
-
     {% if created %}
       <div class="alert alert-success">
         <p>Certificado inserido com sucesso!</p>
@@ -63,8 +59,4 @@
       <a href="{% url 'menu' %}" class="btn btn-primary">Voltar</a>
     </form>
   </div>
-{% endblock %}
-
-{% block extra_js %}
-  <script src="{% static 'js/spinner.js' %}"></script>
 {% endblock %}
