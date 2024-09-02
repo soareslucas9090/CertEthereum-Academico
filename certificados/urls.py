@@ -1,3 +1,4 @@
+from django.shortcuts import redirect
 from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
@@ -22,6 +23,7 @@ urlpatterns = [
     path("menu/search/", SearchView.as_view(), name="search"),
     path("menu/issue/", IssueCertificateView.as_view(), name="issue_certificate"),
     path("login/", LoginView.as_view(), name="login"),
+    path("", RedirectView.as_view()),
     path("menu/", MenuView.as_view(), name="menu"),
     path("menu/logout/", LogoutView.as_view(), name="logout"),
 ]

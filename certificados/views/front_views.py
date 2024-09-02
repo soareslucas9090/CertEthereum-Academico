@@ -32,6 +32,10 @@ def protectedEndPoint(
 
     return None
 
+@method_decorator(csrf_protect, name="dispatch")
+class RedirectView(View):
+    def get(self, request):
+        return redirect("menu")
 
 @method_decorator(csrf_protect, name="dispatch")
 class LogoutView(View):
