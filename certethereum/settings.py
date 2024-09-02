@@ -29,11 +29,6 @@ DATABASES = {
 }
 signing_key = str(os.environ.get("SECRETE_KEY_JWT"))
 
-LOGIN_REDIRECT_URL = "/redirect/"
-
-SESSION_COOKIE_AGE = 1800
-
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 AUTH_USER_MODEL = "certificados.Users"
 ACCOUNT_AUTHENTICATION_METHOD = "email"

@@ -1,20 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-  <style>
-    .full-height {
-      height: 100vh;
-    }
-    .vertical-center {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .login-card {
-      max-width: 400px; /* Aumenta o tamanho máximo do card */
-      width: 100%;
-    }
-  </style>
+  <div id="loading-spinner" class="loading-spinner d-none">
+    <div class="spinner-border text-primary" role="status" aria-label="Carregando"></div>
+  </div>
+
   <div class="col-12 col-md-8 col-lg-4 full-height vertical-center">
     <div class="card shadow-lg login-card">
       <div class="card-body">

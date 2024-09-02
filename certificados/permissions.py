@@ -9,6 +9,9 @@ class IsAdminOrOwnerID(permissions.BasePermission):
             return False
 
         if request.method == "GET" and request.resolver_match.kwargs:
-            return request.user.id == int(request.resolver_match.kwargs["pk"])
+            if not request.user.is_admin:
+                return request.user.id == int(request.resolver_match.kwargs["pk"])
+            else:
+                return True
 
         return request.user.is_admin
