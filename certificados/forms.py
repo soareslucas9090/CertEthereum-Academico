@@ -1,3 +1,4 @@
+import re
 from datetime import date
 
 from django import forms
@@ -21,8 +22,10 @@ class IssueCertificateForm(forms.Form):
     def clean_cpf(self):
         cpf = str(self.cleaned_data.get("cpf"))
 
-        if len(cpf) != 11 or not cpf.isdigit():
-            raise ValidationError("O CPF deve conter 11 dígitos numéricos.")
+        cpf = re.sub("[^0-9]", "", cpf)
+
+        if len(cpf) != 11:
+            raise ValidationError("O CPF deve conter 11 dígitos")
 
         return cpf
 
@@ -94,8 +97,10 @@ class SearchCertificateForm(forms.Form):
 
         if str(self.cleaned_data.get("search_type")) == "cpf":
 
-            if len(value) != 11 or not value.isdigit():
+            cpf = re.sub("[^0-9]", "", value)
+
+            if len(cpf) != 11:
                 raise ValidationError("O CPF fornecido é inválido.")
-            return value
+            return cpf
 
         return value

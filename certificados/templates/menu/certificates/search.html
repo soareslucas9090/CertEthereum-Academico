@@ -85,3 +85,28 @@
     {% endif %}
   </div>
 {% endblock %}
+
+{% block extra_js %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const radioButtons = document.querySelectorAll('input[name="search_type"]')
+      let mascaraCPF
+    
+      radioButtons.forEach(function (radio) {
+        radio.addEventListener('change', function () {
+          const inputValue = document.getElementById('id_value')
+          inputValue.value = '' // Limpa o campo ao trocar de opção
+    
+          if (this.value === 'cpf') {
+            // Verifica se o valor selecionado é CPF
+            mascaraCPF = IMask(inputValue, { mask: '000.000.000-00' })
+          } else {
+            if (mascaraCPF) {
+              mascaraCPF.destroy() // Remove a máscara de CPF ao trocar para Hash
+            }
+          }
+        })
+      })
+    })
+  </script>
+{% endblock %}

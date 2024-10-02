@@ -86,9 +86,21 @@ def certs_interactions(op, data):
             if duplicated_cert[0] == "":
                 block = w3.eth.get_block("latest")  # Obter o bloco mais recente
                 base_fee = block.get("baseFeePerGas", 0)  # Valor base da transação
-                max_fee_per_gas = base_fee + w3.to_wei(
-                    "2", "gwei"
-                )  # Configure aqui o valor máximo de gas que você está disposto a pagar por transação
+
+                try:
+                    gas_limit = contract.functions.emitirCertificado(
+                        cpf,
+                        nome_do_estudante,
+                        nome_da_instituicao,
+                        curso,
+                        descricao_do_curso,
+                        descricao_do_certificado,
+                        data_de_emissao,
+                        carga_horaria,
+                        hash_certificado,
+                    ).estimate_gas({"from": account_address})
+                except Exception as e:
+                    print(e)
 
                 try:
                     transaction = contract.functions.emitirCertificado(
@@ -105,9 +117,10 @@ def certs_interactions(op, data):
                         {
                             "from": account_address,
                             "nonce": w3.eth.get_transaction_count(account_address),
-                            "maxFeePerGas": Wei(max_fee_per_gas),
+                            "gas": gas_limit,
+                            "maxFeePerGas": Wei(base_fee),
                             "maxPriorityFeePerGas": w3.to_wei(
-                                "2", "gwei"
+                                "1", "gwei"
                             ),  # Configure aqui uma "gorjeta" para mineradores para que a transação seja processada mais rapidamente
                         }
                     )
@@ -115,19 +128,19 @@ def certs_interactions(op, data):
                     print(e)
                     return "error on buildding transaction"
 
-                # Calculando o gas estimado e adicionando na transação
-                estimated_gas = w3.eth.estimate_gas(transaction)
-
-                print(f"Gas estimado: {estimated_gas}")
-
-                transaction["gas"] = estimated_gas
-
                 signed_txn = w3.eth.account.sign_transaction(
                     transaction, private_key=private_key
                 )
-                tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+
+                try:
+                    tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+                except Exception as e:
+                    print(e)
 
                 tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+
+                print(f"Gas usado na transação: {tx_receipt['gasUsed']}")
+
                 return tx_receipt["transactionHash"].hex()
 
             else:

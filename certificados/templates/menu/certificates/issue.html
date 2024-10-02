@@ -60,3 +60,11 @@
     </form>
   </div>
 {% endblock %}
+
+{% block extra_js %}
+  <script>
+    var mascaraCPF = IMask(document.getElementById('id_cpf'), {
+      mask: '000.000.000-00'
+    })
+  </script>
+{% endblock %}
