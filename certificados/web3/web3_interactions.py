@@ -4,6 +4,7 @@ from datetime import datetime
 
 from dotenv import load_dotenv
 from web3 import Web3
+from web3.types import Wei
 
 """
     Com a função abaixo é possível executar 3 ações diferentes:
@@ -83,26 +84,42 @@ def certs_interactions(op, data):
             ).call()
 
             if duplicated_cert[0] == "":
+                block = w3.eth.get_block("latest")  # Obter o bloco mais recente
+                base_fee = block.get("baseFeePerGas", 0)  # Valor base da transação
+                max_fee_per_gas = base_fee + w3.to_wei(
+                    "2", "gwei"
+                )  # Configure aqui o valor máximo de gas que você está disposto a pagar por transação
 
-                transaction = contract.functions.emitirCertificado(
-                    cpf,
-                    nome_do_estudante,
-                    nome_da_instituicao,
-                    curso,
-                    descricao_do_curso,
-                    descricao_do_certificado,
-                    data_de_emissao,
-                    carga_horaria,
-                    hash_certificado,
-                ).build_transaction(
-                    {
-                        "from": account_address,
-                        "nonce": w3.eth.get_transaction_count(account_address),
-                        "gasPrice": w3.to_wei("25", "gwei"),
-                    }
-                )
+                try:
+                    transaction = contract.functions.emitirCertificado(
+                        cpf,
+                        nome_do_estudante,
+                        nome_da_instituicao,
+                        curso,
+                        descricao_do_curso,
+                        descricao_do_certificado,
+                        data_de_emissao,
+                        carga_horaria,
+                        hash_certificado,
+                    ).build_transaction(
+                        {
+                            "from": account_address,
+                            "nonce": w3.eth.get_transaction_count(account_address),
+                            "maxFeePerGas": Wei(max_fee_per_gas),
+                            "maxPriorityFeePerGas": w3.to_wei(
+                                "2", "gwei"
+                            ),  # Configure aqui uma "gorjeta" para mineradores para que a transação seja processada mais rapidamente
+                        }
+                    )
+                except Exception as e:
+                    print(e)
+                    return "error on buildding transaction"
+
                 # Calculando o gas estimado e adicionando na transação
                 estimated_gas = w3.eth.estimate_gas(transaction)
+
+                print(f"Gas estimado: {estimated_gas}")
+
                 transaction["gas"] = estimated_gas
 
                 signed_txn = w3.eth.account.sign_transaction(

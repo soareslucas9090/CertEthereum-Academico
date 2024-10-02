@@ -241,6 +241,12 @@ class IssueCertificateView(View):
                         "Este certificado já existe.",
                     )
                     
+                if response.status_code == 500:
+                    form.add_error(
+                        None,
+                        "Ocorreu um erro ao gerar o certificado. Entre em contato com o suporte.",
+                    )
+                    
                 return render(
                     request=request,
                     template_name="menu/certificates/issue.html",

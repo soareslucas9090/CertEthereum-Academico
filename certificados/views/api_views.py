@@ -127,6 +127,13 @@ class IssueCertificateViewSet(GenericAPIView):
                         "status": "error", "detail": "Duplicate Certificate"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+            if transaction_hash == "error on buildding transaction":
+                return Response(
+                    {
+                        "status": "error", "detail": "Internal Error"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+            
             return Response(
                 {"status": "success", "transaction_hash": transaction_hash},
                 status=status.HTTP_201_CREATED,
