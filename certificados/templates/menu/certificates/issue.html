@@ -28,7 +28,7 @@
       </div>
     {% endif %}
 
-    <form id="form" method="POST">
+    <form id="form" method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       <table class="table table-bordered">
         <thead>
@@ -36,8 +36,6 @@
             <th scope="col">Estudante</th>
             <th scope="col">CPF</th>
             <th scope="col">Curso</th>
-            <th scope="col">Descrição do curso</th>
-            <th scope="col">Descrição do certificado</th>
             <th scope="col">Data de Emissão</th>
             <th scope="col">Carga Horária</th>
           </tr>
@@ -48,10 +46,40 @@
             <td>{{ form.student_name|add_class:'form-control' }}</td>
             <td>{{ form.cpf|add_class:'form-control' }}</td>
             <td>{{ form.course|add_class:'form-control' }}</td>
-            <td>{{ form.course_description|add_class:'form-control' }}</td>
-            <td>{{ form.certificate_description|add_class:'form-control' }}</td>
             <td>{{ form.issue_date|add_class:'form-control' }}</td>
             <td>{{ form.course_workload|add_class:'form-control' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Descrição do curso</th>
+            <th scope="col">Descrição do certificado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ form.course_description|add_class:'form-control' }}</td>
+            <td>{{ form.certificate_description|add_class:'form-control' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="send_email" />
+        <label class="form-check-label" for="send_email">Enviar dados do certificado para o aluno?</label>
+      </div>
+      <table class="table table-bordered" id="email_table" style="display: none;">
+        <thead>
+          <tr>
+            <th scope="col">PDF do certificado</th>
+            <th scope="col">Email do aluno</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ form.pdf_certificate|add_class:'form-control' }}</td>
+            <td>{{ form.email|add_class:'form-control' }}</td>
           </tr>
         </tbody>
       </table>
@@ -62,6 +90,7 @@
 {% endblock %}
 
 {% block extra_js %}
+  <script src="{% static 'js/send_email.js' %}"></script>
   <script>
     var mascaraCPF = IMask(document.getElementById('id_cpf'), {
       mask: '000.000.000-00'

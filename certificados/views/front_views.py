@@ -1,8 +1,13 @@
+import os
 from datetime import datetime
+from email.mime.image import MIMEImage
 from typing import Callable
 
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.templatetags.static import static
 from django.test import RequestFactory
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -209,7 +214,7 @@ class IssueCertificateView(View):
         if response:
             return response
 
-        form = IssueCertificateForm(request.POST)
+        form = IssueCertificateForm(request.POST, request.FILES)
 
         if form.is_valid():
 
@@ -225,6 +230,8 @@ class IssueCertificateView(View):
             ]
             data["issue_date"] = form.cleaned_data["issue_date"]
             data["course_workload"] = form.cleaned_data["course_workload"]
+            to_email = form.cleaned_data["email"]
+            pdf_certificate = form.cleaned_data["pdf_certificate"]
 
             header = {}
             header = {"Authorization": f"Bearer {token["access"]}"}
@@ -256,6 +263,125 @@ class IssueCertificateView(View):
                     },
                 )
 
+            if (to_email):
+                
+                first_html = """
+                <!DOCTYPE html>
+                <html lang="pt-BR">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Seu Certificado CertEthereum</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            line-height: 1.6;
+                            color: #333;
+                            max-width: 600px;
+                            margin: 0 auto;
+                            padding: 20px;
+                            background-color: #ffffff;
+                        }
+                        .header {
+                            text-align: center;
+                            margin-bottom: 20px;
+                        }
+                        .header img {
+                            max-width: 100px;
+                        }
+                        h1 {
+                            color: #25478A;
+                            text-align: center;
+                        }
+                        .certificate-info {
+                            background-color: #f9f9f9;
+                            border: 1px solid #ddd;
+                            padding: 20px;
+                            margin-bottom: 20px;
+                        }
+                        .certificate-info p {
+                            margin: 10px 0;
+                        }
+                        .attachment-info {
+                            background-color: #e9f0f9;
+                            border: 1px solid #25478A;
+                            padding: 15px;
+                            margin-bottom: 20px;
+                            color: #0C2047;
+                        }
+                        .footer {
+                            text-align: center;
+                            color: #0C2047;
+                            font-size: 14px;
+                            margin-top: 30px;
+                        }
+                    </style>
+                </head>
+                """
+                
+                logo_path = os.path.join(settings.STATIC_ROOT, 'imgs/logo.png')
+                
+                second_html = f"""
+                <body>
+                    <div class="header">
+                        <img src="cid:logo_image" alt="Logo CertEthereum">
+                    </div>
+                    
+                    <h1>Seu Certificado</h1>
+                    
+                    <div class="certificate-info">
+                        <p><strong>Nome do Aluno:</strong> {data["student_name"]}</p>
+                        <p><strong>CPF:</strong> {data["cpf"]}</p>
+                        <p><strong>Curso:</strong> {data["course"]}</p>
+                        <p><strong>Data de Emissão:</strong> {data["issue_date"]}</p>
+                        <p><strong>Carga Horária:</strong> {data["course_workload"]} horas</p>
+                    </div>
+                    
+                    <div class="attachment-info">
+                        <p>O arquivo do seu certificado está anexado a este e-mail.</p>
+                    </div>
+                    
+                    <div class="footer">
+                        <p>CertEthereum - Lucas Soares</p>
+                    </div>
+                </body>
+                </html>
+                """
+
+                final_html = first_html
+                final_html += second_html
+
+                email = EmailMultiAlternatives(
+                    "Parabés, aqui está seu certificado!",	
+                    f"Seu certificado está em anexo",  # Texto simples alternativo
+                    settings.DEFAULT_FROM_EMAIL,
+                    [to_email],
+                )
+
+                email.attach_alternative(final_html, "text/html")  # Corpo em HTML
+                
+                with open(logo_path, 'rb') as f:
+                    logo = MIMEImage(f.read())
+                    logo.add_header('Content-ID', '<logo_image>')
+                    email.attach(logo) # type: ignore [arg-type]
+                
+                if pdf_certificate:
+                    email.attach(
+                        pdf_certificate.name, 
+                        pdf_certificate.read(), 
+                        pdf_certificate.content_type
+                    )
+
+                try:
+                    email.send()
+                except Exception as e:
+                    print(e)
+                    form.add_error(
+                    None,
+                    "Não foi possível enviar email para o estudante.",
+                )
+            
+            
             return render(
                 request=request,
                 template_name="menu/certificates/issue.html",

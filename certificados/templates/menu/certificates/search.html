@@ -52,35 +52,46 @@
 
     {% if results %}
       <section>
-        <table class="table table-bordered">
-          <caption>Resultados da pesquisa de certificados</caption>
-          <thead>
-            <tr>
-              <th scope="col">Estudante</th>
-              <th scope="col">Instituição</th>
-              <th scope="col">Curso</th>
-              <th scope="col">Descrição do curso</th>
-              <th scope="col">Descrição do certificado</th>
-              <th scope="col">Data de Emissão</th>
-              <th scope="col">Carga Horária</th>
-              <th scope="col">Hash</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for result in results %}
+        <caption>Resultados da pesquisa de certificados</caption>
+        {% for result in results %}
+          <table class="table table-bordered" style="margin-bottom: 0;">
+            <thead>
+              <tr>
+                <th scope="col">Estudante</th>
+                <th scope="col">Instituição</th>
+                <th scope="col">Curso</th>
+                <th scope="col">Data de Emissão</th>
+                <th scope="col">Carga Horária</th>
+                <th scope="col">Hash</th>
+              </tr>
+            </thead>
+            <tbody>
               <tr>
                 <td>{{ result.student_name }}</td>
                 <td>{{ result.institution_name }}</td>
                 <td>{{ result.course }}</td>
-                <td>{{ result.course_description }}</td>
-                <td>{{ result.certificate_description }}</td>
                 <td>{{ result.issue_date }}</td>
                 <td>{{ result.course_workload }}</td>
                 <td>{{ result.hash }}</td>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th scope="col">Descrição do curso</th>
+                <th scope="col">Descrição do certificado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{ result.course_description }}</td>
+                <td>{{ result.certificate_description }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <hr style="opacity: 1;" />
+        {% endfor %}
       </section>
     {% endif %}
   </div>

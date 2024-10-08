@@ -64,6 +64,22 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_METHODS = ["*"]
 
+
+# Email padrão para o envio de emails do Django
+DEFAULT_FROM_EMAIL = os.environ.get("DefaultEmailForPasswordReset")
+EMAIL_HOST_USER = os.environ.get("DefaultEmailForPasswordReset")
+
+# Senha do Email. O Google exige que seja criado uma Senha de APP
+EMAIL_HOST_PASSWORD = os.environ.get("EmailPassword")
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# As configurações padrões são para o serviço de email do Google, mas podem ser alteradas
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+DOMAIN_NAME = "http://127.0.0.1:8000"
+
 if "test" in sys.argv or "test_coverage" in sys.argv:
     DATABASES["default"] = {
         "ENGINE": "django.db.backends.sqlite3",

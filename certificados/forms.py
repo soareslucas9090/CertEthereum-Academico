@@ -14,10 +14,12 @@ class IssueCertificateForm(forms.Form):
     cpf = forms.CharField()
     student_name = forms.CharField()
     course = forms.CharField()
-    course_description = forms.CharField()
-    certificate_description = forms.CharField()
+    course_description = forms.CharField(widget=forms.Textarea)
+    certificate_description = forms.CharField(widget=forms.Textarea)
     issue_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
     course_workload = forms.IntegerField()
+    pdf_certificate = forms.FileField(required=False)
+    email = forms.EmailField(required=False)
 
     def clean_cpf(self):
         cpf = str(self.cleaned_data.get("cpf"))
