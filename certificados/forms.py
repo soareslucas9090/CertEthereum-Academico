@@ -11,15 +11,28 @@ class LoginForm(forms.Form):
 
 
 class IssueCertificateForm(forms.Form):
+    FUNCTIONS = [
+        ("organizou", "Organizou"),
+        ("executou", "Executou"),
+        ("participou", "Participou"),
+    ]
+    TYPES = [("projeto", "Projeto"), ("evento", "Evento"), ("curso", "Curso")]
+
+    internal_id = forms.CharField(required=False)
     cpf = forms.CharField()
     student_name = forms.CharField()
-    course = forms.CharField()
-    course_description = forms.CharField(widget=forms.Textarea)
+    activity = forms.CharField()
+    activity_description = forms.CharField(widget=forms.Textarea)
     certificate_description = forms.CharField(widget=forms.Textarea)
     issue_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
     course_workload = forms.IntegerField()
     pdf_certificate = forms.FileField(required=False)
-    email = forms.EmailField(required=False)
+    email = forms.EmailField(required=True)
+    function = forms.ChoiceField(choices=FUNCTIONS, label="Função")
+    type = forms.ChoiceField(choices=TYPES, label="Tipo")
+    initial_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
+    final_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
+    local = forms.CharField()
 
     def clean_cpf(self):
         cpf = str(self.cleaned_data.get("cpf"))

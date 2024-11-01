@@ -31,15 +31,22 @@ from web3.types import Wei
 
 def to_dict(certificate):
     return {
-        "student_name": certificate[0],
-        "cpf": certificate[1],
-        "institution_name": certificate[2],
-        "course": certificate[3],
-        "course_description": certificate[4],
-        "certificate_description": certificate[5],
-        "issue_date": datetime.fromtimestamp(certificate[6]).strftime("%Y-%m-%d"),
-        "course_workload": certificate[7],
-        "hash": certificate[8],
+        "internal_id": certificate[0],
+        "student_name": certificate[1],
+        "cpf": certificate[2],
+        "student_email": certificate[3],
+        "institution_name": certificate[4],
+        "activity": certificate[5],
+        "activity_description": certificate[6],
+        "certificate_description": certificate[7],
+        "issue_date": datetime.fromtimestamp(certificate[8]).strftime("%Y-%m-%d"),
+        "course_workload": certificate[9],
+        "hash": certificate[10],
+        "function": certificate[11],
+        "type": certificate[12],
+        "initial_date": datetime.fromtimestamp(certificate[13]).strftime("%Y-%m-%d"),
+        "final_date": datetime.fromtimestamp(certificate[14]).strftime("%Y-%m-%d"),
+        "local": certificate[15],
     }
 
 
@@ -72,8 +79,15 @@ def certs_interactions(op, data):
             cpf = data["cpf"]
             nome_do_estudante = data["student_name"]
             nome_da_instituicao = data["institution_name"]
-            curso = data["course"]
-            descricao_do_curso = data["course_description"]
+            id_interno = data["internal_id"]
+            email_do_estudante = data["student_email"]
+            funcao = data["function"]
+            tipo = data["type"]
+            data_inicial = data["initial_date"]
+            data_final = data["final_date"]
+            local = data["local"]
+            atividade = data["activity"]
+            descricao_da_atividade = data["activity_description"]
             descricao_do_certificado = data["certificate_description"]
             data_de_emissao = data["issue_date"]
             carga_horaria = data["course_workload"]
@@ -85,42 +99,51 @@ def certs_interactions(op, data):
 
             if duplicated_cert[0] == "":
                 block = w3.eth.get_block("latest")  # Obter o bloco mais recente
-                base_fee = block.get("baseFeePerGas", 0)  # Valor base da transação
+                base_fee = (
+                    block.get("baseFeePerGas", 0) * 1.2
+                )  # Valor base da transação
+
+                cert_data = (
+                    id_interno,
+                    nome_do_estudante,
+                    cpf,
+                    email_do_estudante,
+                    nome_da_instituicao,
+                    atividade,
+                    descricao_da_atividade,
+                    descricao_do_certificado,
+                    data_de_emissao,
+                    carga_horaria,
+                    hash_certificado,
+                    funcao,
+                    tipo,
+                    data_inicial,
+                    data_final,
+                    local,
+                )
 
                 try:
                     gas_limit = contract.functions.emitirCertificado(
-                        cpf,
-                        nome_do_estudante,
-                        nome_da_instituicao,
-                        curso,
-                        descricao_do_curso,
-                        descricao_do_certificado,
-                        data_de_emissao,
-                        carga_horaria,
-                        hash_certificado,
+                        cert_data
                     ).estimate_gas({"from": account_address})
                 except Exception as e:
                     print(e)
 
+                print("Gas Limit:", gas_limit)
+
                 try:
                     transaction = contract.functions.emitirCertificado(
-                        cpf,
-                        nome_do_estudante,
-                        nome_da_instituicao,
-                        curso,
-                        descricao_do_curso,
-                        descricao_do_certificado,
-                        data_de_emissao,
-                        carga_horaria,
-                        hash_certificado,
+                        cert_data
                     ).build_transaction(
                         {
                             "from": account_address,
-                            "nonce": w3.eth.get_transaction_count(account_address),
+                            "nonce": w3.eth.get_transaction_count(
+                                account_address, "pending"
+                            ),
                             "gas": gas_limit,
-                            "maxFeePerGas": Wei(base_fee),
+                            "maxFeePerGas": Wei(int(base_fee) + w3.to_wei("2", "gwei")),
                             "maxPriorityFeePerGas": w3.to_wei(
-                                "1", "gwei"
+                                "2", "gwei"
                             ),  # Configure aqui uma "gorjeta" para mineradores para que a transação seja processada mais rapidamente
                         }
                     )
@@ -128,20 +151,29 @@ def certs_interactions(op, data):
                     print(e)
                     return "error on buildding transaction"
 
+                print("Transaction built successfully")
+
                 signed_txn = w3.eth.account.sign_transaction(
                     transaction, private_key=private_key
                 )
 
                 try:
                     tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+                    print(f"Hash da transação enviada: {tx_hash.hex()}")
+
                 except Exception as e:
                     print(e)
+
+                print("TX hash:", tx_hash.hex())
 
                 tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 
                 print(f"Gas usado na transação: {tx_receipt['gasUsed']}")
 
-                return tx_receipt["transactionHash"].hex()
+                return {
+                    "transaction_hash": tx_receipt["transactionHash"].hex(),
+                    "certificate_hash": hash_certificado,
+                }
 
             else:
                 return ""

@@ -33,6 +33,7 @@
       <table class="table table-bordered">
         <thead>
           <tr>
+            <th scope="col">ID Interno do Certificado</th>
             <th scope="col">Estudante</th>
             <th scope="col">CPF</th>
             <th scope="col">Curso</th>
@@ -43,9 +44,10 @@
         <tbody>
           <tr>
             {% load custom_tags %}
+            <td>{{ form.internal_id|add_class:'form-control' }}</td>
             <td>{{ form.student_name|add_class:'form-control' }}</td>
             <td>{{ form.cpf|add_class:'form-control' }}</td>
-            <td>{{ form.course|add_class:'form-control' }}</td>
+            <td>{{ form.activity|add_class:'form-control' }}</td>
             <td>{{ form.issue_date|add_class:'form-control' }}</td>
             <td>{{ form.course_workload|add_class:'form-control' }}</td>
           </tr>
@@ -60,8 +62,30 @@
         </thead>
         <tbody>
           <tr>
-            <td>{{ form.course_description|add_class:'form-control' }}</td>
+            <td>{{ form.activity_description|add_class:'form-control' }}</td>
             <td>{{ form.certificate_description|add_class:'form-control' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Email do aluno</th>
+            <th scope="col">Função Exercida</th>
+            <th scope="col">Tipo de Certificado</th>
+            <th scope="col">Data Inicial</th>
+            <th scope="col">Data Final</th>
+            <th scope="col">Local</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ form.email|add_class:'form-control' }}</td>
+            <td>{{ form.function|add_class:'form-select' }}</td>
+            <td>{{ form.type|add_class:'form-select' }}</td>
+            <td>{{ form.initial_date|add_class:'form-control' }}</td>
+            <td>{{ form.final_date|add_class:'form-control' }}</td>
+            <td>{{ form.local|add_class:'form-control' }}</td>
           </tr>
         </tbody>
       </table>
@@ -73,13 +97,11 @@
         <thead>
           <tr>
             <th scope="col">PDF do certificado</th>
-            <th scope="col">Email do aluno</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>{{ form.pdf_certificate|add_class:'form-control' }}</td>
-            <td>{{ form.email|add_class:'form-control' }}</td>
           </tr>
         </tbody>
       </table>

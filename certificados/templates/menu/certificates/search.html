@@ -57,6 +57,7 @@
           <table class="table table-bordered" style="margin-bottom: 0;">
             <thead>
               <tr>
+                <th scope="col">Id Interno do Certificado</th>
                 <th scope="col">Estudante</th>
                 <th scope="col">Instituição</th>
                 <th scope="col">Curso</th>
@@ -67,16 +68,17 @@
             </thead>
             <tbody>
               <tr>
+                <td>{{ result.internal_id }}</td>
                 <td>{{ result.student_name }}</td>
                 <td>{{ result.institution_name }}</td>
-                <td>{{ result.course }}</td>
+                <td>{{ result.activity }}</td>
                 <td>{{ result.issue_date }}</td>
                 <td>{{ result.course_workload }}</td>
                 <td>{{ result.hash }}</td>
               </tr>
             </tbody>
           </table>
-          <table class="table table-bordered">
+          <table class="table table-bordered" style="margin-bottom: 0;">
             <thead>
               <tr>
                 <th scope="col">Descrição do curso</th>
@@ -85,8 +87,30 @@
             </thead>
             <tbody>
               <tr>
-                <td>{{ result.course_description }}</td>
+                <td>{{ result.activity_description }}</td>
                 <td>{{ result.certificate_description }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th scope="col">Email do aluno</th>
+                <th scope="col">Função Exercida</th>
+                <th scope="col">Tipo de Certificado</th>
+                <th scope="col">Data Inicial</th>
+                <th scope="col">Data Final</th>
+                <th scope="col">Local</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{ result.student_email }}</td>
+                <td>{{ result.function }}</td>
+                <td>{{ result.type }}</td>
+                <td>{{ result.initial_date }}</td>
+                <td>{{ result.final_date }}</td>
+                <td>{{ result.local }}</td>
               </tr>
             </tbody>
           </table>

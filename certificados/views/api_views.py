@@ -1,8 +1,12 @@
 from datetime import datetime
 
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import (OpenApiExample, OpenApiParameter,
-                                   OpenApiResponse, extend_schema)
+from drf_spectacular.utils import (
+    OpenApiExample,
+    OpenApiParameter,
+    OpenApiResponse,
+    extend_schema,
+)
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.pagination import PageNumberPagination
@@ -18,6 +22,7 @@ from ..web3 import web3_interactions
 
 class DefaultNumberPagination(PageNumberPagination):
     page_size = 20
+
 
 @extend_schema(tags=["Users"])
 class UsersViewSet(ModelViewSet):
@@ -48,13 +53,13 @@ class UsersViewSet(ModelViewSet):
     )
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
-    
+
     @extend_schema(
         description="Just Admin can access.",
     )
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
-    
+
     @extend_schema(
         description="Just Admin can access.",
     )
@@ -82,11 +87,12 @@ class UsersViewSet(ModelViewSet):
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-       
+
     def get_permissions(self):
         if self.request.method in ["PATCH", "DELETE", "POST", "GET"]:
             return [IsAdminOrOwnerID()]
         return super().get_permissions()
+
 
 @extend_schema(tags=["Issue Certificate"])
 class IssueCertificateViewSet(GenericAPIView):
@@ -96,46 +102,64 @@ class IssueCertificateViewSet(GenericAPIView):
 
     @extend_schema(
         responses={
-            status.HTTP_201_CREATED: OpenApiResponse(description='Created'),
-            status.HTTP_400_BAD_REQUEST: OpenApiResponse(description='Bad Request'),
-            status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(description='Internal Error'),
+            status.HTTP_201_CREATED: OpenApiResponse(description="Created"),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(description="Bad Request"),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
+                description="Internal Error"
+            ),
         }
     )
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer = serializer.validated_data
-        
+
         data = {}
-        
+
         data["cpf"] = serializer["cpf"]
         data["student_name"] = serializer["student_name"]
-        data["course"] = serializer["course"]
-        data["course_description"] = serializer["course_description"]
+        data["activity"] = serializer["activity"]
+        data["activity_description"] = serializer["activity_description"]
         data["certificate_description"] = serializer["certificate_description"]
         data["issue_date"] = int(
             datetime.combine(serializer["issue_date"], datetime.min.time()).timestamp()
         )
         data["course_workload"] = f"{serializer["course_workload"]} horas"
         data["institution_name"] = request.user.name
+        data["internal_id"] = serializer["internal_id"]
+        data["student_email"] = serializer["student_email"]
+        data["function"] = serializer["function"]
+        data["type"] = serializer["type"]
+        data["initial_date"] = int(
+            datetime.combine(
+                serializer["initial_date"], datetime.min.time()
+            ).timestamp()
+        )
+        data["final_date"] = int(
+            datetime.combine(serializer["final_date"], datetime.min.time()).timestamp()
+        )
+        data["local"] = serializer["local"]
 
         try:
-            transaction_hash = web3_interactions.certs_interactions(1, data)
-            if transaction_hash == "":
+            data_transaction = web3_interactions.certs_interactions(1, data)
+
+            if data_transaction == "":
                 return Response(
-                    {
-                        "status": "error", "detail": "Duplicate Certificate"},
+                    {"status": "error", "detail": "Duplicate Certificate"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            if transaction_hash == "error on buildding transaction":
+            if data_transaction == "error on buildding transaction":
                 return Response(
-                    {
-                        "status": "error", "detail": "Internal Error"},
+                    {"status": "error", "detail": "Internal Error"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
-            
+
             return Response(
-                {"status": "success", "transaction_hash": transaction_hash},
+                {
+                    "status": "success",
+                    "transaction_hash": data_transaction["transaction_hash"],
+                    "certificate_hash": data_transaction["certificate_hash"],
+                },
                 status=status.HTTP_201_CREATED,
             )
         except:
@@ -146,6 +170,7 @@ class IssueCertificateViewSet(GenericAPIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+
 @extend_schema(tags=["Search"])
 class SearchCertificateViewSet(GenericAPIView):
     http_method_names = ["get"]
@@ -153,10 +178,12 @@ class SearchCertificateViewSet(GenericAPIView):
 
     @extend_schema(
         responses={
-            status.HTTP_200_OK: OpenApiResponse(description='Success'),
-            status.HTTP_400_BAD_REQUEST: OpenApiResponse(description='Bad Request'),
-            status.HTTP_404_NOT_FOUND: OpenApiResponse(description='Not Found'),
-            status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(description='Internal Error'),
+            status.HTTP_200_OK: OpenApiResponse(description="Success"),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(description="Bad Request"),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Not Found"),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
+                description="Internal Error"
+            ),
         },
         parameters=[
             OpenApiParameter(
@@ -186,12 +213,9 @@ class SearchCertificateViewSet(GenericAPIView):
                 op = 2
             else:
                 return Response(
-                        {
-                            "status": "error",
-                            "detail": "CPF must have 11 numerics digits"
-                        },
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
+                    {"status": "error", "detail": "CPF must have 11 numerics digits"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         data["search_hash"] = request.GET.get("hash", None)
 
@@ -200,16 +224,13 @@ class SearchCertificateViewSet(GenericAPIView):
 
         try:
             certificates = web3_interactions.certs_interactions(op, data)
-            
+
             if certificates == []:
                 return Response(
-                        {
-                            "status": "error",
-                            "detail": "Not results found for search."
-                        },
-                        status=status.HTTP_404_NOT_FOUND,
-                    )
-                
+                    {"status": "error", "detail": "Not results found for search."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
             return Response(
                 {"status": "success", "certificates": certificates},
                 status=status.HTTP_200_OK,
@@ -219,5 +240,5 @@ class SearchCertificateViewSet(GenericAPIView):
                 {
                     "status": "error",
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

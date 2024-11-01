@@ -75,3 +75,6 @@ def compile_and_deploy_contract():
 
     else:
         return "Não foi possível carregar as variáveis de ambiente"
+
+
+compile_and_deploy_contract()

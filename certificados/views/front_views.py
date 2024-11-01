@@ -17,8 +17,14 @@ from certethereum import views_jwt
 
 from ..forms import IssueCertificateForm, LoginForm, SearchCertificateForm
 from .api_views import IssueCertificateViewSet, SearchCertificateViewSet
-from .business import (getTokens, isAuthenticated, refreshToken,
-                       requestFactory, setTokens, verifyToken)
+from .business import (
+    getTokens,
+    isAuthenticated,
+    refreshToken,
+    requestFactory,
+    setTokens,
+    verifyToken,
+)
 
 
 def protectedEndPoint(
@@ -37,10 +43,12 @@ def protectedEndPoint(
 
     return None
 
+
 @method_decorator(csrf_protect, name="dispatch")
 class RedirectView(View):
     def get(self, request):
         return redirect("menu")
+
 
 @method_decorator(csrf_protect, name="dispatch")
 class LogoutView(View):
@@ -200,10 +208,7 @@ class IssueCertificateView(View):
         return render(
             request=request,
             template_name="menu/certificates/issue.html",
-            context={
-                "form": form,
-                "isAuthenticated": isAuth
-            },
+            context={"form": form, "isAuthenticated": isAuth},
         )
 
     def post(self, request):
@@ -221,16 +226,22 @@ class IssueCertificateView(View):
             url = f"/certificates/api/v1/issue/certificates/"
 
             data = {}
+            data["internal_id"] = form.cleaned_data["internal_id"]
             data["cpf"] = form.cleaned_data["cpf"]
             data["student_name"] = form.cleaned_data["student_name"]
-            data["course"] = form.cleaned_data["course"]
-            data["course_description"] = form.cleaned_data["course_description"]
+            data["activity"] = form.cleaned_data["activity"]
+            data["activity_description"] = form.cleaned_data["activity_description"]
             data["certificate_description"] = form.cleaned_data[
                 "certificate_description"
             ]
             data["issue_date"] = form.cleaned_data["issue_date"]
             data["course_workload"] = form.cleaned_data["course_workload"]
-            to_email = form.cleaned_data["email"]
+            data["function"] = form.cleaned_data["function"]
+            data["type"] = form.cleaned_data["type"]
+            data["initial_date"] = form.cleaned_data["initial_date"]
+            data["final_date"] = form.cleaned_data["final_date"]
+            data["local"] = form.cleaned_data["local"]
+            data["student_email"] = form.cleaned_data["email"]
             pdf_certificate = form.cleaned_data["pdf_certificate"]
 
             header = {}
@@ -241,30 +252,28 @@ class IssueCertificateView(View):
             )
 
             if response.status_code != 201:
-                
+
                 if response.status_code == 400:
                     form.add_error(
                         None,
                         "Este certificado já existe.",
                     )
-                    
+
                 if response.status_code == 500:
                     form.add_error(
                         None,
                         "Ocorreu um erro ao gerar o certificado. Entre em contato com o suporte.",
                     )
-                    
+
                 return render(
                     request=request,
                     template_name="menu/certificates/issue.html",
-                    context={
-                        "form": form,
-                        "isAuthenticated": isAuth
-                    },
+                    context={"form": form, "isAuthenticated": isAuth},
                 )
 
-            if (to_email):
-                
+            if pdf_certificate:
+                certificate_hash = response.data["certificate_hash"]  # type: ignore
+
                 first_html = """
                 <!DOCTYPE html>
                 <html lang="pt-BR">
@@ -318,9 +327,9 @@ class IssueCertificateView(View):
                     </style>
                 </head>
                 """
-                
-                logo_path = os.path.join(settings.STATIC_ROOT, 'imgs/logo.png')
-                
+
+                logo_path = os.path.join(settings.STATIC_ROOT, "imgs/logo.png")
+
                 second_html = f"""
                 <body>
                     <div class="header">
@@ -332,9 +341,13 @@ class IssueCertificateView(View):
                     <div class="certificate-info">
                         <p><strong>Nome do Aluno:</strong> {data["student_name"]}</p>
                         <p><strong>CPF:</strong> {data["cpf"]}</p>
-                        <p><strong>Curso:</strong> {data["course"]}</p>
+                        <p><strong>Atividade:</strong> {data["activity"]}</p>
                         <p><strong>Data de Emissão:</strong> {data["issue_date"]}</p>
                         <p><strong>Carga Horária:</strong> {data["course_workload"]} horas</p>
+                        <p><strong>Função Exercida:</strong> {data["function"]}</p>
+                        <p><strong>Tipo do Execício:</strong> {data["type"]}</p>
+                        <p><strong>Local:</strong> {data["local"]}</p>
+                        <p><strong>Hash do Certificado:</strong> {certificate_hash}</p>
                     </div>
                     
                     <div class="attachment-info">
@@ -352,24 +365,24 @@ class IssueCertificateView(View):
                 final_html += second_html
 
                 email = EmailMultiAlternatives(
-                    "Parabés, aqui está seu certificado!",	
+                    "Parabés, aqui está seu certificado!",
                     f"Seu certificado está em anexo",  # Texto simples alternativo
                     settings.DEFAULT_FROM_EMAIL,
-                    [to_email],
+                    [data["student_email"]],
                 )
 
                 email.attach_alternative(final_html, "text/html")  # Corpo em HTML
-                
-                with open(logo_path, 'rb') as f:
+
+                with open(logo_path, "rb") as f:
                     logo = MIMEImage(f.read())
-                    logo.add_header('Content-ID', '<logo_image>')
-                    email.attach(logo) # type: ignore [arg-type]
-                
+                    logo.add_header("Content-ID", "<logo_image>")
+                    email.attach(logo)  # type: ignore [arg-type]
+
                 if pdf_certificate:
                     email.attach(
-                        pdf_certificate.name, 
-                        pdf_certificate.read(), 
-                        pdf_certificate.content_type
+                        pdf_certificate.name,
+                        pdf_certificate.read(),
+                        pdf_certificate.content_type,
                     )
 
                 try:
@@ -377,11 +390,10 @@ class IssueCertificateView(View):
                 except Exception as e:
                     print(e)
                     form.add_error(
-                    None,
-                    "Não foi possível enviar email para o estudante.",
-                )
-            
-            
+                        None,
+                        "Não foi possível enviar email para o estudante.",
+                    )
+
             return render(
                 request=request,
                 template_name="menu/certificates/issue.html",

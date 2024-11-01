@@ -44,6 +44,10 @@ width: 100%;
   pointer-events: none; /* Garante que a imagem não interfira na usabilidade */
 }
 
+textarea {
+  height: 150px;
+}
+
 .custom-navbar {
 background-color: #053061; /* Azul escuro */
 color: white; /* Cor do texto em branco para contraste */

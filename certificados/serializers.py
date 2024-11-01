@@ -32,12 +32,51 @@ class UsersSerializer(serializers.ModelSerializer):
 
 class IssueCertificateSerializer(serializers.Serializer):
     cpf = serializers.CharField(required=True)
+    internal_id = serializers.CharField(required=True)
+    student_email = serializers.EmailField(required=True)
+    function = serializers.CharField(required=True)
+    type = serializers.CharField(required=True)
+    initial_date = serializers.DateField(required=True)
+    final_date = serializers.DateField(required=True)
+    local = serializers.CharField(required=True)
     student_name = serializers.CharField(required=True)
-    course = serializers.CharField(required=True)
-    course_description = serializers.CharField(required=True)
+    activity = serializers.CharField(required=True)
+    activity_description = serializers.CharField(required=True)
     certificate_description = serializers.CharField(required=True)
     issue_date = serializers.DateField(required=True)
     course_workload = serializers.IntegerField(required=True)
+
+    def validate_function(self, value):
+        valide_functions = ["organizou", "executou", "participou"]
+
+        if value.lower() not in valide_functions:
+            raise serializers.ValidationError(
+                """The value should be "organizou", "executou" ou "participou" """
+            )
+
+        return value.lower()
+
+    def validate_type(self, value):
+        valide_types = ["projeto", "evento", "curso"]
+
+        if value.lower() not in valide_types:
+            raise serializers.ValidationError(
+                """The value should be "projeto", "evento", "curso" """
+            )
+
+        return value.lower()
+
+    def validate_initial_date(self, value):
+        if value > date.today():
+            raise serializers.ValidationError("Initial date must be before today.")
+
+        return value
+
+    def validate_final_date(self, value):
+        if value > date.today():
+            raise serializers.ValidationError("Final date must be before today.")
+
+        return value
 
     def validate_cpf(self, value):
         if len(value) != 11:
