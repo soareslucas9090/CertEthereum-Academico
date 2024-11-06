@@ -10,6 +10,7 @@
     {% if created %}
       <div class="alert alert-success">
         <p>Certificado inserido com sucesso!</p>
+        <p>Este é o hash deste certificado: {{ certificate_hash }}</p>
       </div>
     {% endif %}
 
@@ -91,7 +92,7 @@
       </table>
       <div class="form-check">
         <input class="form-check-input" type="checkbox" value="" id="send_email" />
-        <label class="form-check-label" for="send_email">Enviar dados do certificado para o aluno?</label>
+        <label class="form-check-label" for="send_email">Enviar PDF do certificado para o aluno?</label>
       </div>
       <table class="table table-bordered" id="email_table" style="display: none;">
         <thead>

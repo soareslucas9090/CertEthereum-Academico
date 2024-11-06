@@ -271,133 +271,147 @@ class IssueCertificateView(View):
                     context={"form": form, "isAuthenticated": isAuth},
                 )
 
+            certificate_hash = response.data["certificate_hash"]  # type: ignore
+
+            first_html = """
+            <!DOCTYPE html>
+            <html lang="pt-BR">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Seu Certificado CertEthereum</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        line-height: 1.6;
+                        color: #333;
+                        max-width: 600px;
+                        margin: 0 auto;
+                        padding: 20px;
+                        background-color: #ffffff;
+                    }
+                    .header {
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+                    .header img {
+                        max-width: 100px;
+                    }
+                    h1 {
+                        color: #25478A;
+                        text-align: center;
+                    }
+                    .certificate-info {
+                        background-color: #f9f9f9;
+                        border: 1px solid #ddd;
+                        padding: 20px;
+                        margin-bottom: 20px;
+                    }
+                    .certificate-info p {
+                        margin: 10px 0;
+                    }
+                    .attachment-info {
+                        background-color: #e9f0f9;
+                        border: 1px solid #25478A;
+                        padding: 15px;
+                        margin-bottom: 20px;
+                        color: #0C2047;
+                    }
+                    .footer {
+                        text-align: center;
+                        color: #0C2047;
+                        font-size: 14px;
+                        margin-top: 30px;
+                    }
+                </style>
+            </head>
+            """
+
+            logo_path = os.path.join(settings.STATIC_ROOT, "imgs/logo.png")
+
+            attachment_info = ""
+
             if pdf_certificate:
-                certificate_hash = response.data["certificate_hash"]  # type: ignore
-
-                first_html = """
-                <!DOCTYPE html>
-                <html lang="pt-BR">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Seu Certificado CertEthereum</title>
-                    <style>
-                        body {
-                            font-family: Arial, sans-serif;
-                            line-height: 1.6;
-                            color: #333;
-                            max-width: 600px;
-                            margin: 0 auto;
-                            padding: 20px;
-                            background-color: #ffffff;
-                        }
-                        .header {
-                            text-align: center;
-                            margin-bottom: 20px;
-                        }
-                        .header img {
-                            max-width: 100px;
-                        }
-                        h1 {
-                            color: #25478A;
-                            text-align: center;
-                        }
-                        .certificate-info {
-                            background-color: #f9f9f9;
-                            border: 1px solid #ddd;
-                            padding: 20px;
-                            margin-bottom: 20px;
-                        }
-                        .certificate-info p {
-                            margin: 10px 0;
-                        }
-                        .attachment-info {
-                            background-color: #e9f0f9;
-                            border: 1px solid #25478A;
-                            padding: 15px;
-                            margin-bottom: 20px;
-                            color: #0C2047;
-                        }
-                        .footer {
-                            text-align: center;
-                            color: #0C2047;
-                            font-size: 14px;
-                            margin-top: 30px;
-                        }
-                    </style>
-                </head>
+                attachment_info = """
+                <div class="attachment-info">
+                    <p>O arquivo do seu certificado está anexado a este e-mail.</p>
+                </div>
                 """
 
-                logo_path = os.path.join(settings.STATIC_ROOT, "imgs/logo.png")
+            preposicao = "a"
+            if data["function"] == "participou":
+                preposicao = "da"
 
-                second_html = f"""
-                <body>
-                    <div class="header">
-                        <img src="cid:logo_image" alt="Logo CertEthereum">
-                    </div>
-                    
-                    <h1>Seu Certificado</h1>
-                    
-                    <div class="certificate-info">
-                        <p><strong>Nome do Aluno:</strong> {data["student_name"]}</p>
-                        <p><strong>CPF:</strong> {data["cpf"]}</p>
-                        <p><strong>Atividade:</strong> {data["activity"]}</p>
-                        <p><strong>Data de Emissão:</strong> {data["issue_date"]}</p>
-                        <p><strong>Carga Horária:</strong> {data["course_workload"]} horas</p>
-                        <p><strong>Função Exercida:</strong> {data["function"]}</p>
-                        <p><strong>Tipo do Execício:</strong> {data["type"]}</p>
-                        <p><strong>Local:</strong> {data["local"]}</p>
-                        <p><strong>Hash do Certificado:</strong> {certificate_hash}</p>
-                    </div>
-                    
-                    <div class="attachment-info">
-                        <p>O arquivo do seu certificado está anexado a este e-mail.</p>
-                    </div>
-                    
-                    <div class="footer">
-                        <p>CertEthereum - Lucas Soares</p>
-                    </div>
-                </body>
-                </html>
-                """
+            second_html = f"""
+            <body>
+                <div class="header">
+                    <img src="cid:logo_image" alt="Logo CertEthereum">
+                </div>
+                
+                <h1>Seu Certificado</h1>
+                
+                <div class="certificate-info">
+                    <p>Prezado(a) Extensionista,</p>
+                    <p>Segue em anexo seu certificado de participação no(a) <strong>{data["type"]} {data["activity"]}</strong>, confirmando que você <strong>{data["function"]}</strong> {preposicao} atividade.</p>
+                    <br>
+                    <p><strong>Nome do Aluno:</strong> {data["student_name"]}</p>
+                    <p><strong>Data de Emissão:</strong> {data["issue_date"]}</p>
+                    <p><strong>Carga Horária:</strong> {data["course_workload"]} horas</p>
+                    <p><strong>Local:</strong> {data["local"]}</p>
+                    <p><strong>Hash do Certificado:</strong> {certificate_hash}</p>
+                </div>
 
-                final_html = first_html
-                final_html += second_html
+                {attachment_info}
+                
+                <div class="footer">
+                    <p>CertEthereum - Lucas Soares</p>
+                </div>
+            </body>
+            </html>
+            """
 
-                email = EmailMultiAlternatives(
-                    "Parabés, aqui está seu certificado!",
-                    f"Seu certificado está em anexo",  # Texto simples alternativo
-                    settings.DEFAULT_FROM_EMAIL,
-                    [data["student_email"]],
+            final_html = first_html
+            final_html += second_html
+
+            email = EmailMultiAlternatives(
+                "Parabés, aqui está seu certificado!",
+                f"Estes são os dados do seu certificado",  # Texto simples alternativo
+                settings.DEFAULT_FROM_EMAIL,
+                [data["student_email"]],
+            )
+
+            email.attach_alternative(final_html, "text/html")  # Corpo em HTML
+
+            with open(logo_path, "rb") as f:
+                logo = MIMEImage(f.read())
+                logo.add_header("Content-ID", "<logo_image>")
+                email.attach(logo)  # type: ignore [arg-type]
+
+            if pdf_certificate:
+                email.attach(
+                    pdf_certificate.name,
+                    pdf_certificate.read(),
+                    pdf_certificate.content_type,
                 )
 
-                email.attach_alternative(final_html, "text/html")  # Corpo em HTML
-
-                with open(logo_path, "rb") as f:
-                    logo = MIMEImage(f.read())
-                    logo.add_header("Content-ID", "<logo_image>")
-                    email.attach(logo)  # type: ignore [arg-type]
-
-                if pdf_certificate:
-                    email.attach(
-                        pdf_certificate.name,
-                        pdf_certificate.read(),
-                        pdf_certificate.content_type,
-                    )
-
-                try:
-                    email.send()
-                except Exception as e:
-                    print(e)
-                    form.add_error(
-                        None,
-                        "Não foi possível enviar email para o estudante.",
-                    )
+            try:
+                email.send()
+            except Exception as e:
+                print(e)
+                form.add_error(
+                    None,
+                    "Não foi possível enviar email para o estudante.",
+                )
 
             return render(
                 request=request,
                 template_name="menu/certificates/issue.html",
-                context={"form": form, "isAuthenticated": isAuth, "created": True},
+                context={
+                    "form": form,
+                    "isAuthenticated": isAuth,
+                    "created": True,
+                    "certificate_hash": certificate_hash,
+                },
             )
 
         else:

@@ -19,20 +19,26 @@ class IssueCertificateForm(forms.Form):
     TYPES = [("projeto", "Projeto"), ("evento", "Evento"), ("curso", "Curso")]
 
     internal_id = forms.CharField(required=False)
-    cpf = forms.CharField()
-    student_name = forms.CharField()
-    activity = forms.CharField()
-    activity_description = forms.CharField(widget=forms.Textarea)
-    certificate_description = forms.CharField(widget=forms.Textarea)
-    issue_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
-    course_workload = forms.IntegerField()
+    cpf = forms.CharField(required=True)
+    student_name = forms.CharField(required=True)
+    activity = forms.CharField(required=True)
+    activity_description = forms.CharField(required=True, widget=forms.Textarea)
+    certificate_description = forms.CharField(required=True, widget=forms.Textarea)
+    issue_date = forms.DateField(
+        required=True, widget=forms.DateInput(attrs={"type": "date"})
+    )
+    course_workload = forms.IntegerField(required=True)
     pdf_certificate = forms.FileField(required=False)
     email = forms.EmailField(required=True)
-    function = forms.ChoiceField(choices=FUNCTIONS, label="Função")
-    type = forms.ChoiceField(choices=TYPES, label="Tipo")
-    initial_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
-    final_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
-    local = forms.CharField()
+    function = forms.ChoiceField(required=True, choices=FUNCTIONS, label="Função")
+    type = forms.ChoiceField(required=True, choices=TYPES, label="Tipo")
+    initial_date = forms.DateField(
+        required=True, widget=forms.DateInput(attrs={"type": "date"})
+    )
+    final_date = forms.DateField(
+        required=True, widget=forms.DateInput(attrs={"type": "date"})
+    )
+    local = forms.CharField(required=True)
 
     def clean_cpf(self):
         cpf = str(self.cleaned_data.get("cpf"))
