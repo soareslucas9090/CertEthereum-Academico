@@ -5,6 +5,9 @@
   <div class="container-fluid mt-4">
     <header>
       <h1>Submeter Certificado</h1>
+      <p>
+        Campos com <span>*</span> são obrigatórios.
+      </p>
     </header>
 
     {% if created %}
@@ -35,11 +38,21 @@
         <thead>
           <tr>
             <th scope="col">ID Interno do Certificado</th>
-            <th scope="col">Estudante</th>
-            <th scope="col">CPF</th>
-            <th scope="col">Curso</th>
-            <th scope="col">Data de Emissão</th>
-            <th scope="col">Carga Horária</th>
+            <th scope="col">
+              Estudante <span>*</span>
+            </th>
+            <th scope="col">
+              CPF <span>*</span>
+            </th>
+            <th scope="col">
+              Atividade <span>*</span>
+            </th>
+            <th scope="col">
+              Data de Emissão <span>*</span>
+            </th>
+            <th scope="col">
+              Carga Horária <span>*</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -57,8 +70,12 @@
       <table class="table table-bordered">
         <thead>
           <tr>
-            <th scope="col">Descrição do curso</th>
-            <th scope="col">Descrição do certificado</th>
+            <th scope="col">
+              Descrição da atividade <span>*</span>
+            </th>
+            <th scope="col">
+              Descrição do certificado <span>*</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -71,12 +88,24 @@
       <table class="table table-bordered">
         <thead>
           <tr>
-            <th scope="col">Email do aluno</th>
-            <th scope="col">Função Exercida</th>
-            <th scope="col">Tipo de Certificado</th>
-            <th scope="col">Data Inicial</th>
-            <th scope="col">Data Final</th>
-            <th scope="col">Local</th>
+            <th scope="col">
+              Email do aluno <span>*</span>
+            </th>
+            <th scope="col">
+              Função Exercida <span>*</span>
+            </th>
+            <th scope="col">
+              Tipo de Certificado <span>*</span>
+            </th>
+            <th scope="col">
+              Data Inicial <span>*</span>
+            </th>
+            <th scope="col">
+              Data Final <span>*</span>
+            </th>
+            <th scope="col">
+              Local <span>*</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -97,7 +126,9 @@
       <table class="table table-bordered" id="email_table" style="display: none;">
         <thead>
           <tr>
-            <th scope="col">PDF do certificado</th>
+            <th scope="col">
+              PDF do certificado <span>*</span>
+            </th>
           </tr>
         </thead>
         <tbody>

@@ -48,6 +48,10 @@ textarea {
   height: 150px;
 }
 
+span {
+  color: #ff0000;
+}
+
 .custom-navbar {
 background-color: #053061; /* Azul escuro */
 color: white; /* Cor do texto em branco para contraste */
