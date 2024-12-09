@@ -69,13 +69,21 @@ pip install -r requirements.txt
 Configure as variáveis de ambiente em um arquivo .env na raiz do projeto:
 
 ```env
-ALCHEMY_API_URL=<sua_api_alchemy>
-ETH_ACCOUNT=<endereço_ethereum>
-ETH_PRIVATE_KEY=<chave_privada>
-DEBUG=True
-DATABASE_URL=<sua_url_banco>
-EMAIL_HOST_USER=<seu_email>
-EMAIL_HOST_PASSWORD=<senha_email>
+ALCHEMY_API_URL=<url_da_API_Alchemy>
+ACCOUNT_ETHEREUM=<endereço_da_conta_ethereum>
+PRIVATE_KEY_ETHEREUM=<chave_privada_da_conta_ethereum>
+DEBUG_MODE=True or False
+ALLOWED_HOSTS=*
+BD_ENGINE=django.db.backends.BancoDeDados
+BD_NAME=<nome do banco>
+BD_PASS=<Senha do Banco>
+BD_USER=<nome do banco.usuario>
+BD_PORT=0000
+BD_HOST=<host_do_banco>
+SECRET_KEY_JWT=<chave_secreta_para_chave_JWT>
+SECRETE_KEY_DJANGO=<chave_secreta_do_django>
+DefaultEmailForPasswordReset=<emailpadraopararesetdesenha>
+EmailPassword=<senha do email>
 ```
 Realize as migrações:
 
@@ -104,5 +112,5 @@ Não são necessárias mudanças no código.
 ## 📖 Documentação da API
 Acesse a documentação interativa Swagger em:
 
-<url_do_servidor>/schema/swagger/
+<url_do_servidor>/api/schema/swagger/
 
